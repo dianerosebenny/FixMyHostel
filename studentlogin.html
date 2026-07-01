@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FixMyHostel — Register</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #eef0f2;
+      --card:    #ffffff;
+      --navy:    #12203a;
+      --blue:    #1a4a9c;
+      --green:   #1e8a45;
+      --text:    #12203a;
+      --muted:   #6b7280;
+      --border:  #d1d5db;
+      --error:   #b91c1c;
+      --radius:  5px;
+    }
+
+    body {
+      font-family: 'Source Sans 3', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px 48px;
+      color: var(--text);
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 4px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.10);
+      width: 100%;
+      max-width: 460px;
+      overflow: hidden;
+    }
+
+    .top-bar { height: 4px; background: linear-gradient(90deg, var(--blue), var(--green)); }
+
+    /* HEADER */
+    .card-header {
+      padding: 28px 36px 22px;
+      border-bottom: 1px solid #e9eaec;
+      text-align: center;
+    }
+
+    .logo-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; margin-bottom: 18px;
+    }
+    .logo-row img {
+      width: 56px; height: 56px;
+      object-fit: contain; border-radius: 10px;
+      background: #000; padding: 4px;
+    }
+    .logo-row .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; font-weight: 700; color: var(--navy);
+      text-align: left; line-height: 1.2;
+    }
+    .logo-row .brand-sub {
+      font-size: 11px; color: var(--muted); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    .card-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; color: var(--navy); margin-bottom: 6px;
+    }
+    .card-header p { font-size: 13px; color: var(--muted); }
+
+    /* TABS */
+    .tabs { display: flex; border-bottom: 1px solid var(--border); }
+    .tab-btn {
+      flex: 1; padding: 13px;
+      background: #f8f9fa; border: none;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 13px; font-weight: 700;
+      color: var(--muted); cursor: pointer;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      border-bottom: 3px solid transparent;
+      transition: all 0.18s;
+    }
+    .tab-btn:first-child { border-right: 1px solid var(--border); }
+    .tab-btn.active { background: white; color: var(--blue); border-bottom-color: var(--blue); }
+    .tab-btn:hover:not(.active) { background: #eff1f3; color: var(--navy); }
+
+    /* PANELS */
+    .panel { display: none; padding: 28px 36px 32px; }
+    .panel.active { display: block; }
+
+    /* FORM */
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block; font-size: 13px; font-weight: 700;
+      color: var(--navy); margin-bottom: 6px;
+    }
+    .hint { font-weight: 400; color: var(--muted); font-size: 11px; margin-left: 5px; }
+
+    .form-group input,
+    .form-group select {
+      width: 100%; padding: 10px 13px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      font-family: 'Source Sans 3', sans-serif; font-size: 14px;
+      color: var(--text); background: white; outline: none;
+      -webkit-appearance: none;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(26,74,156,0.09);
+    }
+    .form-group input.err { border-color: var(--error); }
+
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 40px; }
+    .pw-eye {
+      position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; font-size: 15px;
+      color: var(--muted); padding: 2px;
+    }
+
+    .err-msg {
+      font-size: 12px; color: var(--error); font-weight: 600;
+      margin-top: 4px; display: none;
+    }
+    .err-msg.show { display: block; }
+
+    /* strength */
+    .str-bar { height: 3px; background: #e5e7eb; border-radius: 3px; margin-top: 7px; overflow: hidden; }
+    .str-fill { height: 100%; width: 0; border-radius: 3px; transition: width 0.3s, background 0.3s; }
+    .str-label { font-size: 11px; color: var(--muted); margin-top: 3px; font-weight: 600; }
+
+    /* submit */
+    .btn {
+      width: 100%; padding: 12px;
+      background: var(--navy); color: white;
+      border: none; border-radius: var(--radius);
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: background 0.18s;
+    }
+    .btn:hover { background: #1c3159; }
+
+    /* success */
+    .success-box {
+      display: none;
+      background: #f0fdf4; border: 1px solid #86efac;
+      border-radius: var(--radius); padding: 20px;
+      text-align: center; margin-top: 18px;
+    }
+    .success-box h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px; color: #14532d; margin-bottom: 6px;
+    }
+    .success-box p { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+    .case-id {
+      font-family: 'Courier New', monospace;
+      font-size: 24px; font-weight: 900; color: var(--blue);
+      letter-spacing: 0.12em; background: white;
+      border: 1px solid var(--border); padding: 8px 20px;
+      border-radius: 4px; display: inline-block; margin-bottom: 8px;
+    }
+    .success-box small { font-size: 11px; color: var(--muted); display: block; }
+
+    .footer-link {
+      text-align: center; margin-top: 18px;
+      font-size: 13px; color: var(--muted);
+    }
+    .footer-link a { color: var(--blue); font-weight: 700; text-decoration: none; }
+    .footer-link a:hover { text-decoration: underline; }
+
+    /* legal strip */
+    .legal {
+      padding: 13px 36px; border-top: 1px solid #e9eaec;
+      background: #f8f9fa; text-align: center;
+      font-size: 11px; color: var(--muted); line-height: 1.6;
+    }
+    .legal strong { color: var(--navy); }
+
+    .page-foot { margin-top: 18px; font-size: 11px; color: #9ca3af; text-align: center; }
+
+    /* ── TOAST NOTIFICATION ── */
+    .toast {
+      position: fixed;
+      top: 24px; right: 24px;
+      background: var(--navy);
+      color: white;
+      padding: 14px 18px;
+      border-radius: 5px;
+      font-size: 13px; font-weight: 600;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      display: flex; align-items: center; gap: 12px;
+      z-index: 9999;
+      max-width: 300px;
+      transform: translateX(120%);
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+      overflow: hidden;
+    }
+    .toast.show { transform: translateX(0); }
+    .toast-icon {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--green);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; flex-shrink: 0;
+    }
+    .toast-body { flex: 1; }
+    .toast-title { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+    .toast-sub { font-size: 11px; color: #9ca3af; line-height: 1.4; }
+    .toast-close {
+      background: none; border: none; color: #6b7280;
+      cursor: pointer; font-size: 18px; padding: 0;
+      line-height: 1; flex-shrink: 0;
+    }
+    .toast-close:hover { color: white; }
+    .toast-bar {
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 3px; width: 100%;
+      background: var(--green);
+      border-radius: 0 0 5px 5px;
+      transform-origin: left;
+    }
+    .toast.show .toast-bar {
+      animation: drain 4s linear forwards;
+    }
+    @keyframes drain {
+      from { transform: scaleX(1); }
+      to   { transform: scaleX(0); }
+    }
+
+    @media(max-width:480px){
+      .panel { padding: 22px 20px 26px; }
+      .card-header { padding: 22px 20px 18px; }
+      .legal { padding: 13px 20px; }
+      .row-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="top-bar"></div>
+
+  <div class="card-header">
+    <div class="logo-row">
+      <img src="Logo.png" alt="FixMyHostel Logo"
+        onerror="this.style.display='none'" />
+      <div>
+        <div class="brand-name">FixMyHostel</div>
+        <div class="brand-sub">Student Safety Portal</div>
+      </div>
+    </div>
+    <h2>Student Portal</h2>
+    <p>Secure and anonymous complaint reporting for hostel residents</p>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-login" onclick="show('login')">Login</button>
+    <button class="tab-btn" id="tab-reg" onclick="show('reg')">Register</button>
+  </div>
+
+  <!-- ── LOGIN PANEL ── -->
+  <div class="panel active" id="login">
+
+    <div class="form-group">
+      <label for="l-id">College ID</label>
+      <input type="text" id="l-id" placeholder="e.g. CS2021045" />
+      <div class="err-msg" id="el-id">⚠ Please enter your college ID</div>
+    </div>
+
+    <div class="form-group">
+      <label for="l-pw">Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="l-pw" placeholder="Enter password" />
+        <button class="pw-eye" onclick="togglePw('l-pw',this)" type="button">👁</button>
+      </div>
+      <div class="err-msg" id="el-pw">⚠ Please enter your password</div>
+    </div>
+
+    <button class="btn" onclick="doLogin()" style="margin-top:4px;">Login</button>
+
+    <div class="footer-link" style="margin-top:14px;">
+      New student? <a href="#" onclick="show('reg');return false;">Register here</a>
+      &nbsp;·&nbsp; <a href="forgotpass.html">Forgot password?</a>
+    </div>
+  </div>
+
+  <!-- ── REGISTER PANEL ── -->
+  <div class="panel" id="reg">
+
+    <div class="row-2">
+      <div class="form-group">
+        <label for="r-fn">First Name</label>
+        <input type="text" id="r-fn" placeholder="First name" />
+        <div class="err-msg" id="er-fn">⚠ Required</div>
+      </div>
+      <div class="form-group">
+        <label for="r-ln">Last Name</label>
+        <input type="text" id="r-ln" placeholder="Last name" />
+        <div class="err-msg" id="er-ln">⚠ Required</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="r-id">College ID / Roll Number</label>
+      <input type="text" id="r-id" placeholder="e.g. CS2021045" />
+      <div class="err-msg" id="er-id">⚠ Please enter your college ID</div>
+    </div>
+
+    <div class="row-2">
+      <div class="form-group">
+        <label for="r-hostel">Hostel Block</label>
+        <select id="r-hostel">
+          <option value="">— Select —</option>
+          <option>Block Boys</option>
+          <option>Block Girls</option>
+        </select>
+        <div class="err-msg" id="er-hostel">⚠ Required</div>
+      </div>
+      <div class="form-group">
+        <label for="r-room">Room Number</label>
+        <input type="text" id="r-room" placeholder="e.g. A-204" />
+        <div class="err-msg" id="er-room">⚠ Required</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="r-email">
+        College Email
+        <span class="hint">@student.mes.ac.in or @mes.ac.in</span>
+      </label>
+      <input type="email" id="r-email" placeholder="yourname@student.mes.ac.in" />
+      <div class="err-msg" id="er-email">⚠ Must be a valid MES email (@student.mes.ac.in or @mes.ac.in)</div>
+    </div>
+
+    <div class="form-group">
+      <label for="r-pw">Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="r-pw" placeholder="Minimum 8 characters"
+          oninput="checkStr(this.value)" />
+        <button class="pw-eye" onclick="togglePw('r-pw',this)" type="button">👁</button>
+      </div>
+      <div class="str-bar"><div class="str-fill" id="str-fill"></div></div>
+      <div class="str-label" id="str-label">Password strength</div>
+      <div class="err-msg" id="er-pw">⚠ Password must be at least 8 characters</div>
+    </div>
+
+    <button class="btn" onclick="doRegister()" style="margin-top:4px;">Create Account</button>
+
+    <!-- Success box — hidden until register succeeds -->
+    <div class="success-box" id="reg-success">
+      <h3>Registration Successful</h3>
+      <p>Your anonymous case tracking ID has been assigned. Save it — you'll need it to track your complaints.</p>
+      <div class="case-id" id="reg-caseid">—</div>
+      <small>Do not share this ID with anyone.</small>
+    </div>
+
+    <div class="footer-link">
+      Already registered? <a href="#" onclick="show('login');return false;">Login here</a>
+    </div>
+  </div>
+
+  <div class="legal">
+    <strong>Confidentiality Notice:</strong> All submissions are encrypted. Your identity is protected and will not be
+    disclosed without a legal order. False reports are subject to disciplinary action.
+  </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div class="toast" id="toast">
+  <div class="toast-icon">✓</div>
+  <div class="toast-body">
+    <div class="toast-title">Registration Successful</div>
+    <div class="toast-sub">Your account has been created. Please save your Case ID.</div>
+  </div>
+  <button class="toast-close" onclick="closeToast()">×</button>
+  <div class="toast-bar"></div>
+</div>
+
+<div class="page-foot">© 2026 FixMyHostel · Student Safety Portal · All rights reserved</div>
+
+<script>
+  // ============================================================
+  //  BACKEND CONNECTION
+  //  All fetch() calls go to your Flask server at port 5000
+  // ============================================================
+  const API = 'http://localhost:5000/api';
+
+  // ── Switch between Login and Register tabs ──────────────
+  function show(which) {
+    document.getElementById('login').classList.toggle('active', which === 'login');
+    document.getElementById('reg').classList.toggle('active', which === 'reg');
+    document.getElementById('tab-login').classList.toggle('active', which === 'login');
+    document.getElementById('tab-reg').classList.toggle('active', which === 'reg');
+  }
+
+  // ── Toggle password show/hide ────────────────────────────
+  function togglePw(id, btn) {
+    const el = document.getElementById(id);
+    el.type = el.type === 'password' ? 'text' : 'password';
+    btn.textContent = el.type === 'password' ? '\u{1F441}' : '\u{1F648}';
+  }
+
+  // ── Show or hide an error message ───────────────────────
+  function setErr(id, show) {
+    document.getElementById(id).classList.toggle('show', show);
+    const inputId = id.replace('er-','r-').replace('el-','l-');
+    const el = document.getElementById(inputId);
+    if (el) el.classList.toggle('err', show);
+  }
+
+  // ============================================================
+  //  LOGIN — sends data to POST /api/login on your Flask server
+  // ============================================================
+  async function doLogin() {
+    const id = document.getElementById('l-id').value.trim();
+    const pw = document.getElementById('l-pw').value.trim();
+
+    // Validate fields first
+    setErr('el-id', !id);
+    setErr('el-pw', !pw);
+    if (!id || !pw) return;
+
+    // Change button text so student knows something is happening
+    const btn = document.querySelector('#login .btn');
+    btn.textContent = 'Logging in...';
+    btn.disabled = true;
+
+    try {
+      // Send login request to backend
+      const response = await fetch(API + '/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ college_id: id, password: pw })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Save case_id so dashboard.html can use it
+        sessionStorage.setItem('case_id', result.case_id);
+        sessionStorage.setItem('college_id', id);
+        // Go to dashboard
+        window.location.href = 'dashboard.html';
+      } else {
+        alert('Login failed: ' + result.message);
+        btn.textContent = 'Login';
+        btn.disabled = false;
+      }
+
+    } catch (err) {
+      alert('Cannot connect to server.\nMake sure your backend is running (python app.py)');
+      btn.textContent = 'Login';
+      btn.disabled = false;
+    }
+  }
+
+  // ============================================================
+  //  REGISTER — sends data to POST /api/register on Flask server
+  // ============================================================
+  async function doRegister() {
+    const fn     = document.getElementById('r-fn').value.trim();
+    const ln     = document.getElementById('r-ln').value.trim();
+    const id     = document.getElementById('r-id').value.trim();
+    const hostel = document.getElementById('r-hostel').value;
+    const room   = document.getElementById('r-room').value.trim();
+    const email  = document.getElementById('r-email').value.trim();
+    const pw     = document.getElementById('r-pw').value;
+
+    const emailOk = /^[^\s@]+@(student\.mes\.ac\.in|mes\.ac\.in)$/.test(email);
+
+    // Frontend validation
+    setErr('er-fn',     !fn);
+    setErr('er-ln',     !ln);
+    setErr('er-id',     !id);
+    setErr('er-hostel', !hostel);
+    setErr('er-room',   !room);
+    setErr('er-email',  !emailOk);
+    setErr('er-pw',     pw.length < 8);
+
+    if (!fn || !ln || !id || !hostel || !room || !emailOk || pw.length < 8) return;
+
+    const btn = document.querySelector('#reg .btn');
+    btn.textContent = 'Creating account...';
+    btn.disabled = true;
+
+    try {
+      const response = await fetch(API + '/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          first_name:   fn,
+          last_name:    ln,
+          college_id:   id,
+          hostel_block: hostel,
+          room_number:  room,
+          email:        email,
+          password:     pw
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Show the REAL Case ID that came from the database
+        document.getElementById('reg-caseid').textContent = '#' + result.case_id;
+        document.getElementById('reg-success').style.display = 'block';
+        document.getElementById('reg-success').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        showToast();
+      } else {
+        alert('Registration failed: ' + result.message);
+      }
+      btn.textContent = 'Create Account';
+      btn.disabled = false;
+
+    } catch (err) {
+      alert('Cannot connect to server.\nMake sure your backend is running (python app.py)');
+      btn.textContent = 'Create Account';
+      btn.disabled = false;
+    }
+  }
+
+  // ── Toast notification ────────────────────────────────────
+  function showToast() {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => closeToast(), 4000);
+  }
+
+  function closeToast() {
+    document.getElementById('toast').classList.remove('show');
+  }
+
+  // ── Password strength meter ───────────────────────────────
+  function checkStr(pw) {
+    const score = [pw.length>=8, /[A-Z]/.test(pw), /[0-9]/.test(pw), /[^A-Za-z0-9]/.test(pw)].filter(Boolean).length;
+    const levels = [
+      { w:'0%',   c:'#e5e7eb', t:'Password strength' },
+      { w:'25%',  c:'#dc2626', t:'Weak' },
+      { w:'50%',  c:'#f97316', t:'Fair' },
+      { w:'75%',  c:'#eab308', t:'Good' },
+      { w:'100%', c:'#16a34a', t:'Strong \u2713' },
+    ];
+    const l = levels[score];
+    const f = document.getElementById('str-fill');
+    f.style.width = l.w; f.style.background = l.c;
+    const lb = document.getElementById('str-label');
+    lb.textContent = l.t; lb.style.color = l.c;
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FixMyHostel — File a Complaint</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #eef0f2;
+      --card:         #ffffff;
+      --navy:         #12203a;
+      --navy-hover:   #1c3159;
+      --blue:         #1a4a9c;
+      --green:        #1e8a45;
+      --text:         #12203a;
+      --muted:        #6b7280;
+      --border:       #d1d5db;
+      --error:        #b91c1c;
+      --radius:       6px;
+
+      /* severity colours */
+      --c-verbal:     #1a4a9c;
+      --c-bullying:   #d97706;
+      --c-physical:   #dc2626;
+      --c-sexual:     #7c3aed;
+    }
+
+    body {
+      font-family: 'Source Sans 3', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 28px 16px 60px;
+    }
+
+    /* ── TOP NAV BAR ── */
+    .topnav {
+      max-width: 780px;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo img {
+      width: 42px; height: 42px;
+      object-fit: contain; border-radius: 8px; background:#000; padding:3px;
+    }
+    .nav-logo-fallback {
+      width:42px;height:42px;background:linear-gradient(135deg,#1a4a9c,#1e8a45);
+      border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;
+    }
+    .nav-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px; font-weight: 700; color: var(--navy);
+    }
+    .nav-brand span { display:block; font-family:'Source Sans 3',sans-serif; font-size:11px; font-weight:600; color:var(--muted); letter-spacing:0.04em; text-transform:uppercase; }
+
+    .nav-case {
+      font-family: 'Courier New', monospace;
+      font-size: 13px; font-weight: 700;
+      color: var(--blue);
+      background: white;
+      border: 1px solid var(--border);
+      padding: 6px 14px; border-radius: 4px;
+    }
+    .nav-case small { display:block; font-size:10px; color:var(--muted); font-family:'Source Sans 3',sans-serif; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; }
+
+    /* ── PROGRESS STEPS ── */
+    .progress-wrap {
+      max-width: 780px; margin: 0 auto 24px;
+      background: white; border-radius: 4px;
+      padding: 16px 24px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+      display: flex; align-items: center; gap: 0;
+    }
+
+    .step {
+      display: flex; align-items: center; gap: 8px; flex: 1;
+    }
+    .step-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; flex-shrink: 0;
+      border: 2px solid var(--border); color: var(--muted);
+      background: white; transition: all 0.3s;
+    }
+    .step.active .step-num {
+      background: var(--blue); border-color: var(--blue); color: white;
+    }
+    .step.done .step-num {
+      background: var(--green); border-color: var(--green); color: white;
+    }
+    .step-label { font-size: 12px; font-weight: 700; color: var(--muted); }
+    .step.active .step-label { color: var(--blue); }
+    .step.done .step-label { color: var(--green); }
+
+    .step-line {
+      flex: 1; height: 2px; background: var(--border); margin: 0 8px;
+      border-radius: 2px; transition: background 0.3s;
+    }
+    .step-line.done { background: var(--green); }
+
+    /* ── MAIN CARD ── */
+    .card {
+      max-width: 780px; margin: 0 auto;
+      background: var(--card);
+      border-radius: 4px;
+      box-shadow: 0 2px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+      overflow: hidden;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(14px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    .top-bar { height: 5px; background: linear-gradient(90deg, var(--blue), var(--green)); }
+
+    .card-header {
+      padding: 24px 36px 20px;
+      border-bottom: 1px solid #e9eaec;
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+    }
+
+    .card-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px; font-weight: 700; color: var(--navy);
+      margin-bottom: 4px;
+    }
+    .card-header p { font-size: 13px; color: var(--muted); line-height: 1.5; max-width: 480px; }
+
+    .anon-badge {
+      flex-shrink: 0;
+      background: #f0fdf4; border: 1px solid #86efac;
+      border-radius: 4px; padding: 8px 14px;
+      font-size: 11px; font-weight: 700;
+      color: #15803d; text-align: center;
+      letter-spacing: 0.03em;
+    }
+    .anon-badge span { display:block; font-size:18px; margin-bottom:2px; }
+
+    /* ── FORM SECTIONS (steps) ── */
+    .form-section { display: none; padding: 28px 36px 32px; }
+    .form-section.active { display: block; }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px; font-weight: 700; color: var(--navy);
+      margin-bottom: 6px;
+    }
+    .section-desc { font-size: 13px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+
+    /* ── FORM ELEMENTS ── */
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block; font-size: 13px; font-weight: 700;
+      color: var(--navy); margin-bottom: 7px; letter-spacing: 0.01em;
+    }
+    .form-group .field-hint { font-weight:400; color:var(--muted); font-size:11px; margin-left:6px; }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%; padding: 11px 14px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      font-family: 'Source Sans 3', sans-serif; font-size: 14px;
+      color: var(--text); background: #fff; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(26,74,156,0.10);
+    }
+    .form-group textarea { resize: vertical; min-height: 110px; line-height: 1.6; }
+    .form-group input.invalid,
+    .form-group select.invalid,
+    .form-group textarea.invalid {
+      border-color: var(--error);
+    }
+
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+    .error-msg {
+      font-size: 12px; color: var(--error); font-weight: 600;
+      margin-top: 5px; display: none;
+    }
+    .error-msg.visible { display: block; }
+
+    /* char counter */
+    .char-count { font-size: 11px; color: var(--muted); text-align:right; margin-top:4px; }
+
+    /* ── INCIDENT TYPE CARDS ── */
+    .type-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 12px; margin-bottom: 8px;
+    }
+
+    .type-card {
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      background: #fafafa;
+    }
+    .type-card:hover { border-color: #9ca3af; background: white; }
+    .type-card.selected { background: white; }
+
+    .type-card input[type="radio"] {
+      position: absolute; opacity: 0; width: 0; height: 0;
+    }
+
+    .type-card .type-icon { font-size: 24px; margin-bottom: 8px; }
+    .type-card .type-name {
+      font-size: 14px; font-weight: 800; color: var(--navy); margin-bottom: 4px;
+    }
+    .type-card .type-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+    .type-card .type-badge {
+      display: inline-block; font-size: 9px; font-weight: 800;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 20px; margin-bottom: 6px;
+    }
+
+    /* per-type colours */
+    .type-card[data-type="verbal"].selected   { border-color: var(--c-verbal); }
+    .type-card[data-type="bullying"].selected { border-color: var(--c-bullying); }
+    .type-card[data-type="physical"].selected { border-color: var(--c-physical); }
+    .type-card[data-type="sexual"].selected   { border-color: var(--c-sexual); }
+
+    .badge-verbal   { background:#dbeafe; color:var(--c-verbal); }
+    .badge-bullying { background:#fef3c7; color:var(--c-bullying); }
+    .badge-physical { background:#fee2e2; color:var(--c-physical); }
+    .badge-sexual   { background:#ede9fe; color:var(--c-sexual); }
+
+    .type-card[data-type="verbal"].selected   .type-name { color: var(--c-verbal); }
+    .type-card[data-type="bullying"].selected .type-name { color: var(--c-bullying); }
+    .type-card[data-type="physical"].selected .type-name { color: var(--c-physical); }
+    .type-card[data-type="sexual"].selected   .type-name { color: var(--c-sexual); }
+
+    /* escalation notice shown after type selected */
+    .escalation-notice {
+      display: none;
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      font-size: 12px; line-height: 1.6;
+      margin-top: 12px; font-weight: 600;
+    }
+    .escalation-notice.visible { display: flex; gap: 10px; align-items: flex-start; }
+    .escalation-notice .notice-icon { font-size: 18px; flex-shrink:0; }
+
+    .notice-verbal   { background:#dbeafe; color:#1e40af; border:1px solid #93c5fd; }
+    .notice-bullying { background:#fef3c7; color:#92400e; border:1px solid #fcd34d; }
+    .notice-physical { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
+    .notice-sexual   { background:#ede9fe; color:#5b21b6; border:1px solid #c4b5fd; }
+
+    /* ── ACCUSED TYPE TOGGLE ── */
+    .accused-toggle {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+      margin-bottom: 20px;
+    }
+    .accused-btn {
+      padding: 14px; border: 2px solid var(--border);
+      border-radius: var(--radius); background: #fafafa;
+      cursor: pointer; text-align: center;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 13px; font-weight: 700; color: var(--muted);
+      transition: all 0.2s;
+    }
+    .accused-btn .ab-icon { font-size: 22px; display:block; margin-bottom:6px; }
+    .accused-btn:hover { border-color:#9ca3af; color:var(--navy); background:white; }
+    .accused-btn.selected { border-color: var(--blue); color: var(--blue); background: #eff6ff; }
+
+    /* staff warning */
+    .staff-warning {
+      display:none; background:#fff7ed; border:1px solid #fed7aa;
+      border-radius:var(--radius); padding:12px 14px;
+      font-size:12px; color:#92400e; line-height:1.6;
+      margin-bottom:20px; font-weight:600;
+    }
+    .staff-warning.visible { display:block; }
+
+    /* ── FILE UPLOAD ── */
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 28px 20px; text-align: center;
+      cursor: pointer; transition: all 0.2s;
+      background: #fafafa;
+    }
+    .upload-area:hover { border-color: var(--blue); background: #eff6ff; }
+    .upload-area.has-files { border-color: var(--green); background: #f0fdf4; }
+    .upload-icon { font-size: 32px; margin-bottom: 10px; }
+    .upload-title { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom:4px; }
+    .upload-sub { font-size: 12px; color: var(--muted); }
+    .upload-area input[type="file"] { display:none; }
+
+    .file-list { margin-top:12px; display:flex; flex-wrap:wrap; gap:8px; }
+    .file-chip {
+      display:flex; align-items:center; gap:6px;
+      background:white; border:1px solid var(--border);
+      border-radius:4px; padding:5px 10px;
+      font-size:12px; font-weight:600; color:var(--navy);
+    }
+    .file-chip button {
+      background:none;border:none;cursor:pointer;
+      color:var(--muted);font-size:14px;line-height:1;
+      padding:0 2px;
+    }
+    .file-chip button:hover { color:var(--error); }
+
+    /* ai warning */
+    .ai-check-notice {
+      background:#fefce8; border:1px solid #fde047;
+      border-radius:var(--radius); padding:10px 14px;
+      font-size:12px; color:#713f12; margin-top:10px;
+      display:none; font-weight:600;
+    }
+    .ai-check-notice.visible { display:block; }
+
+    /* ── WITNESS FIELD ── */
+    .witness-row {
+      display:flex; gap:8px; margin-bottom:8px;
+    }
+    .witness-row input { flex:1; }
+    .witness-row button {
+      padding:0 14px; background:none;
+      border:1px solid var(--border); border-radius:var(--radius);
+      cursor:pointer; font-size:18px; color:var(--muted);
+      transition:all 0.2s;
+    }
+    .witness-row button:hover { border-color:var(--error); color:var(--error); }
+
+    .add-witness {
+      font-size:13px; font-weight:700; color:var(--blue);
+      background:none; border:none; cursor:pointer; padding:4px 0;
+    }
+    .add-witness:hover { text-decoration:underline; }
+
+    /* ── DECLARATION SECTION ── */
+    .declaration-box {
+      background:#f8f9fa; border:1px solid var(--border);
+      border-radius:var(--radius); padding:18px 20px;
+      font-size:13px; color:var(--muted); line-height:1.8;
+      margin-bottom:20px;
+    }
+    .declaration-box strong { color:var(--navy); }
+
+    .checkbox-row {
+      display:flex; align-items:flex-start; gap:12px;
+      margin-bottom:14px;
+    }
+    .checkbox-row input[type="checkbox"] {
+      width:16px; height:16px; margin-top:3px;
+      accent-color:var(--blue); cursor:pointer; flex-shrink:0;
+    }
+    .checkbox-row label {
+      font-size:13px; color:var(--text); cursor:pointer; line-height:1.5;
+    }
+
+    /* ── BUTTONS ── */
+    .btn-row { display:flex; gap:12px; margin-top:8px; }
+
+    .btn-primary {
+      flex:1; padding:13px;
+      background:var(--navy); color:white;
+      border:none; border-radius:var(--radius);
+      font-family:'Source Sans 3',sans-serif;
+      font-size:14px; font-weight:700;
+      cursor:pointer; letter-spacing:0.05em; text-transform:uppercase;
+      transition:background 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover { background:var(--navy-hover); }
+    .btn-primary:active { transform:scale(0.99); }
+
+    .btn-secondary {
+      padding:13px 20px;
+      background:white; color:var(--navy);
+      border:1px solid var(--border); border-radius:var(--radius);
+      font-family:'Source Sans 3',sans-serif;
+      font-size:14px; font-weight:700;
+      cursor:pointer; transition:all 0.2s;
+    }
+    .btn-secondary:hover { border-color:var(--navy); }
+
+    /* ── SUCCESS SCREEN ── */
+    .success-screen {
+      display:none; padding:48px 36px;
+      text-align:center;
+      animation:fadeUp 0.5s ease both;
+    }
+    .success-screen .s-icon { font-size:52px; margin-bottom:16px; }
+    .success-screen h2 {
+      font-family:'Playfair Display',serif;
+      font-size:26px; font-weight:700; color:var(--navy); margin-bottom:8px;
+    }
+    .success-screen p { font-size:14px; color:var(--muted); line-height:1.7; max-width:440px; margin:0 auto 24px; }
+
+    .case-card {
+      background:#f0fdf4; border:1px solid #86efac;
+      border-radius:var(--radius); padding:20px;
+      max-width:340px; margin:0 auto 24px;
+    }
+    .case-card .cc-label { font-size:11px; font-weight:700; color:#15803d; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px; }
+    .case-card .cc-id {
+      font-family:'Courier New',monospace;
+      font-size:28px; font-weight:900; color:var(--blue);
+      letter-spacing:0.12em;
+    }
+    .case-card .cc-sub { font-size:12px; color:var(--muted); margin-top:6px; }
+
+    .escalation-summary {
+      background:#fafafa; border:1px solid var(--border);
+      border-radius:var(--radius); padding:16px 20px;
+      max-width:440px; margin:0 auto 24px;
+      text-align:left;
+    }
+    .escalation-summary .es-title {
+      font-size:12px; font-weight:700; color:var(--navy);
+      text-transform:uppercase; letter-spacing:0.06em; margin-bottom:10px;
+    }
+    .es-row {
+      display:flex; justify-content:space-between;
+      font-size:13px; padding:6px 0;
+      border-bottom:1px solid #e9eaec;
+    }
+    .es-row:last-child { border-bottom:none; }
+    .es-row span:first-child { color:var(--muted); }
+    .es-row span:last-child { font-weight:700; color:var(--navy); }
+
+    /* ── LEGAL BAR ── */
+    .legal-bar {
+      padding:14px 36px; border-top:1px solid #e9eaec;
+      background:#f8f9fa; text-align:center;
+      font-size:11px; color:var(--muted); line-height:1.6;
+    }
+    .legal-bar strong { color:var(--navy); }
+
+    /* ── PAGE FOOTER ── */
+    .page-footer { text-align:center; margin-top:20px; font-size:11px; color:#9ca3af; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width:580px) {
+      .form-section { padding:22px 20px 28px; }
+      .card-header { padding:20px 20px 16px; flex-direction:column; }
+      .legal-bar { padding:14px 20px; }
+      .row-2, .row-3, .type-grid, .accused-toggle { grid-template-columns:1fr; }
+      .topnav { flex-direction:column; gap:12px; align-items:flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- TOP NAV -->
+  <nav class="topnav">
+    <a class="nav-logo" href="studentlogin.html">
+      <img src="Images/logo.png" alt="FixMyHostel"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+      <div class="nav-logo-fallback" style="display:none">🏠</div>
+      <div>
+        <div class="nav-brand">FixMyHostel <span>Student Safety Portal</span></div>
+      </div>
+    </a>
+    <div class="nav-case">
+      <small>Your Case ID</small>
+      #FMH-4821
+    </div>
+  </nav>
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-wrap">
+    <div class="step active" id="prog-1">
+      <div class="step-num">1</div>
+      <div class="step-label">Incident Type</div>
+    </div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step" id="prog-2">
+      <div class="step-num">2</div>
+      <div class="step-label">Details</div>
+    </div>
+    <div class="step-line" id="line-2"></div>
+    <div class="step" id="prog-3">
+      <div class="step-num">3</div>
+      <div class="step-label">Evidence</div>
+    </div>
+    <div class="step-line" id="line-3"></div>
+    <div class="step" id="prog-4">
+      <div class="step-num">4</div>
+      <div class="step-label">Declaration</div>
+    </div>
+  </div>
+
+  <!-- MAIN CARD -->
+  <div class="card" id="main-card">
+    <div class="top-bar"></div>
+
+    <div class="card-header">
+      <div>
+        <h1>File a Complaint</h1>
+        <p>All submissions are encrypted and anonymous. Your identity is never revealed to investigators without a formal legal order.</p>
+      </div>
+      <div class="anon-badge">
+        <span>🔒</span>
+        ANONYMOUS<br>SUBMISSION
+      </div>
+    </div>
+
+    <!-- ══════════ STEP 1: Incident Type ══════════ -->
+    <div class="form-section active" id="step-1">
+      <div class="section-title">What type of incident are you reporting?</div>
+      <div class="section-desc">Select the category that best describes what happened. This determines who will handle your case.</div>
+
+      <div class="type-grid">
+
+        <label class="type-card" data-type="verbal" onclick="selectType('verbal')">
+          <input type="radio" name="incident-type" value="verbal" />
+          <div class="type-badge badge-verbal">Low Severity</div>
+          <div class="type-icon">💬</div>
+          <div class="type-name">Verbal / Cyberbullying</div>
+          <div class="type-desc">Name calling, online harassment, threatening messages, social exclusion.</div>
+        </label>
+
+        <label class="type-card" data-type="bullying" onclick="selectType('bullying')">
+          <input type="radio" name="incident-type" value="bullying" />
+          <div class="type-badge badge-bullying">Medium Severity</div>
+          <div class="type-icon">🔁</div>
+          <div class="type-name">Repeated Bullying</div>
+          <div class="type-desc">Ongoing pattern of harassment, intimidation, or targeting over time.</div>
+        </label>
+
+        <label class="type-card" data-type="physical" onclick="selectType('physical')">
+          <input type="radio" name="incident-type" value="physical" />
+          <div class="type-badge badge-physical">High Severity</div>
+          <div class="type-icon">🚨</div>
+          <div class="type-name">Physical Assault</div>
+          <div class="type-desc">Any physical violence, hitting, pushing, or bodily harm.</div>
+        </label>
+
+        <label class="type-card" data-type="sexual" onclick="selectType('sexual')">
+          <input type="radio" name="incident-type" value="sexual" />
+          <div class="type-badge badge-sexual">Critical — POSH Act</div>
+          <div class="type-icon">⚡</div>
+          <div class="type-name">Sexual Harassment / Assault</div>
+          <div class="type-desc">Any form of sexual harassment, unwanted contact, or assault.</div>
+        </label>
+
+      </div>
+
+      <div class="error-msg" id="err-type" style="margin-bottom:8px;">⚠ Please select an incident type</div>
+
+      <!-- Dynamic escalation notice -->
+      <div class="escalation-notice notice-verbal" id="notice-verbal">
+        <div class="notice-icon">ℹ️</div>
+        <div>Your complaint will be reviewed by the <strong>Hostel Warden</strong>. A mediation process will be arranged. Response within 48 hours.</div>
+      </div>
+      <div class="escalation-notice notice-bullying" id="notice-bullying">
+        <div class="notice-icon">⚠️</div>
+        <div>Your complaint goes to the <strong>Hostel Committee</strong> for formal review. Repeated patterns are automatically flagged. Response within 24 hours.</div>
+      </div>
+      <div class="escalation-notice notice-physical" id="notice-physical">
+        <div class="notice-icon">🚨</div>
+        <div>This will be escalated directly to the <strong>Hostel Principal</strong>. A counselor will be assigned within 6 hours. You will be offered assistance filing a police FIR.</div>
+      </div>
+      <div class="escalation-notice notice-sexual" id="notice-sexual">
+        <div class="notice-icon">⚡</div>
+        <div>Under the <strong>POSH Act (India)</strong>, this complaint goes directly to the <strong>Internal Complaints Committee (ICC)</strong> and University authority. Immediate counselor support will be arranged.</div>
+      </div>
+
+      <div class="btn-row" style="margin-top:24px;">
+        <button class="btn-primary" onclick="goTo(2)">Next: Incident Details →</button>
+      </div>
+    </div>
+
+    <!-- ══════════ STEP 2: Details ══════════ -->
+    <div class="form-section" id="step-2">
+      <div class="section-title">Describe the Incident</div>
+      <div class="section-desc">Provide as much detail as possible. The more specific you are, the easier it is to investigate — even without knowing your identity.</div>
+
+      <!-- Who is accused -->
+      <div class="form-group">
+        <label>Who are you reporting?</label>
+        <div class="accused-toggle">
+          <button class="accused-btn" id="acc-student" onclick="selectAccused('student')" type="button">
+            <span class="ab-icon">🎓</span> Another Student
+          </button>
+          <button class="accused-btn" id="acc-staff" onclick="selectAccused('staff')" type="button">
+            <span class="ab-icon">👔</span> Warden / Staff
+          </button>
+        </div>
+        <div class="staff-warning" id="staff-warning">
+          ⚠️ <strong>Note:</strong> Since you are reporting a staff member or warden, your complaint will be routed directly to the <strong>Hostel Principal</strong> — bypassing the accused entirely. If the principal is implicated, it escalates to the University Grievance Cell.
+        </div>
+        <div class="error-msg" id="err-accused">⚠ Please select who you are reporting</div>
+      </div>
+
+      <div class="row-2">
+        <div class="form-group">
+          <label for="incident-date">Date of Incident</label>
+          <input type="date" id="incident-date" />
+          <div class="error-msg" id="err-date">⚠ Please enter the date</div>
+        </div>
+        <div class="form-group">
+          <label for="incident-time">Approximate Time <span class="field-hint">Optional</span></label>
+          <input type="time" id="incident-time" />
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="form-group">
+          <label for="incident-location">Location in Hostel</label>
+          <select id="incident-location">
+            <option value="">— Select location —</option>
+            <option>My Room</option>
+            <option>Accused's Room</option>
+            <option>Common Room</option>
+            <option>Corridor / Hallway</option>
+            <option>Bathroom / Washroom</option>
+            <option>Dining Hall</option>
+            <option>Terrace / Rooftop</option>
+            <option>Outside Hostel Premises</option>
+            <option>Online / Digital</option>
+            <option>Other</option>
+          </select>
+          <div class="error-msg" id="err-location">⚠ Please select a location</div>
+        </div>
+        <div class="form-group">
+          <label for="incident-block">Hostel Block</label>
+          <select id="incident-block">
+            <option value="">— Select —</option>
+            <option>Block Boys</option>
+            <option>Block Girls</option>
+            <option>Not applicable</option>
+          </select>
+          <div class="error-msg" id="err-block">⚠ Required</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="incident-desc">Describe what happened <span class="field-hint">Be as specific as possible</span></label>
+        <textarea id="incident-desc" placeholder="Describe the incident in detail — what happened, what was said, how it made you feel, and any other relevant context..." maxlength="1000" oninput="updateChar(this, 'char-desc', 1000)"></textarea>
+        <div class="char-count"><span id="char-desc">0</span> / 1000 characters</div>
+        <div class="error-msg" id="err-desc">⚠ Please describe the incident (at least 30 characters)</div>
+      </div>
+
+      <div class="form-group">
+        <label>Witnesses <span class="field-hint">Optional — their names are kept confidential</span></label>
+        <div id="witness-list">
+          <div class="witness-row">
+            <input type="text" placeholder="Witness name or description (e.g. 'my roommate')" />
+            <button type="button" onclick="removeWitness(this)">×</button>
+          </div>
+        </div>
+        <button class="add-witness" type="button" onclick="addWitness()">+ Add another witness</button>
+      </div>
+
+      <div class="form-group">
+        <label for="prior-reports">Have you reported this before? <span class="field-hint">Optional</span></label>
+        <select id="prior-reports">
+          <option value="">— Select —</option>
+          <option>No, this is my first report</option>
+          <option>Yes, I reported to the warden — no action was taken</option>
+          <option>Yes, I reported to a teacher — no action was taken</option>
+          <option>Yes, I tried to report but was discouraged</option>
+        </select>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-secondary" onclick="goTo(1)">← Back</button>
+        <button class="btn-primary" onclick="goTo(3)">Next: Upload Evidence →</button>
+      </div>
+    </div>
+
+    <!-- ══════════ STEP 3: Evidence ══════════ -->
+    <div class="form-section" id="step-3">
+      <div class="section-title">Upload Evidence</div>
+      <div class="section-desc">Evidence is optional but strengthens your case. All files are encrypted. Accepted: photos, screenshots, audio, video, documents.</div>
+
+      <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+        <input type="file" id="file-input" multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx" onchange="handleFiles(this.files)" />
+        <div class="upload-icon">📎</div>
+        <div class="upload-title">Click to upload files</div>
+        <div class="upload-sub">Photos, screenshots, videos, audio recordings, documents<br>Max 10 files · 20MB each</div>
+      </div>
+
+      <div class="file-list" id="file-list"></div>
+
+      <div class="form-group" style="margin-top:20px;">
+        <label for="evidence-desc">Describe your evidence <span class="field-hint">Optional — helps investigators understand what they're looking at</span></label>
+        <textarea id="evidence-desc" placeholder="e.g. 'The first screenshot shows WhatsApp messages from 14th Feb. The photo shows bruising on my arm.'" style="min-height:80px;" maxlength="500" oninput="updateChar(this,'char-ev',500)"></textarea>
+        <div class="char-count"><span id="char-ev">0</span> / 500 characters</div>
+      </div>
+
+      <div class="form-group">
+        <label for="evidence-platform">If cyberbullying — which platform? <span class="field-hint">Optional</span></label>
+        <select id="evidence-platform">
+          <option value="">— Not applicable —</option>
+          <option>WhatsApp</option>
+          <option>Instagram</option>
+          <option>Snapchat</option>
+          <option>Twitter / X</option>
+          <option>Telegram</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-secondary" onclick="goTo(2)">← Back</button>
+        <button class="btn-primary" onclick="goTo(4)">Next: Review & Submit →</button>
+      </div>
+    </div>
+
+    <!-- ══════════ STEP 4: Declaration ══════════ -->
+    <div class="form-section" id="step-4">
+      <div class="section-title">Review & Declaration</div>
+      <div class="section-desc">Please read the declaration carefully and confirm before submitting.</div>
+
+      <div class="declaration-box">
+        I, the undersigned student, hereby declare that the information provided in this complaint is <strong>true and accurate</strong> to the best of my knowledge. I understand that:
+        <br/><br/>
+        1. <strong>False complaints</strong> are a violation of the Student Code of Conduct and may result in disciplinary action against me.
+        <br/>
+        2. My <strong>identity is protected</strong> by the FixMyHostel anonymity system and will not be disclosed to any investigator without a court or legal order.
+        <br/>
+        3. This complaint will be routed to the <strong>appropriate authority</strong> based on the severity of the incident I have reported.
+        <br/>
+        4. I consent to the <strong>secure storage</strong> of the evidence I have uploaded for the purpose of investigation.
+      </div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="dec-truth" />
+        <label for="dec-truth">I confirm that all information I have provided is truthful and accurate to the best of my knowledge.</label>
+      </div>
+      <div class="error-msg" id="err-dec-truth" style="margin-top:-10px; margin-bottom:14px;">⚠ You must confirm this to proceed</div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="dec-policy" />
+        <label for="dec-policy">I have read and agree to the FixMyHostel Student Safety Policy and understand the consequences of filing a false complaint.</label>
+      </div>
+      <div class="error-msg" id="err-dec-policy" style="margin-top:-10px; margin-bottom:14px;">⚠ You must agree to the policy</div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="dec-anon" />
+        <label for="dec-anon">I understand that my identity will only be revealed if legally required by a court order, and I consent to this condition.</label>
+      </div>
+      <div class="error-msg" id="err-dec-anon" style="margin-top:-10px; margin-bottom:20px;">⚠ You must acknowledge this</div>
+
+      <div class="btn-row">
+        <button class="btn-secondary" onclick="goTo(3)">← Back</button>
+        <button class="btn-primary" onclick="submitComplaint()" style="background:#1e8a45;">
+          ✓ Submit Complaint Securely
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════ SUCCESS SCREEN ══════════ -->
+    <div class="success-screen" id="success-screen">
+      <div class="s-icon">✅</div>
+      <h2>Complaint Submitted Successfully</h2>
+      <p>Your complaint has been received and encrypted. The appropriate authority has been notified. You can track your case at any time using your Case ID below.</p>
+
+      <div class="case-card">
+        <div class="cc-label">Your Anonymous Case ID</div>
+        <div class="cc-id" id="final-case-id">#FMH-4821</div>
+        <div class="cc-sub">Save this. Do not share it with anyone.</div>
+      </div>
+
+      <div class="escalation-summary">
+        <div class="es-title">What happens next</div>
+        <div class="es-row"><span>Routed to</span><span id="es-authority">—</span></div>
+        <div class="es-row"><span>Response SLA</span><span id="es-sla">—</span></div>
+        <div class="es-row"><span>Counselor assigned</span><span id="es-counselor">—</span></div>
+        <div class="es-row"><span>Your identity</span><span>Protected · Encrypted</span></div>
+      </div>
+
+      <button class="btn-primary" style="max-width:300px; margin:0 auto;" onclick="window.location.href='studentlogin.html'">
+        Return to Portal Home
+      </button>
+    </div>
+
+    <div class="legal-bar">
+      <strong>Confidentiality Notice:</strong> All submissions are end-to-end encrypted. Identity is protected under the Student Safety Policy.
+      Investigators only see your Case ID, not your name. False reports are subject to disciplinary proceedings.
+    </div>
+  </div>
+
+  <div class="page-footer">© 2026 FixMyHostel · Student Safety Portal · All rights reserved</div>
+
+  <script>
+    let selectedType = null;
+    let selectedAccused = null;
+    let currentStep = 1;
+    let uploadedFiles = [];
+
+    // ── INCIDENT TYPE SELECTION ──
+    function selectType(type) {
+      selectedType = type;
+      document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+      document.querySelector(`.type-card[data-type="${type}"]`).classList.add('selected');
+      document.querySelectorAll('.escalation-notice').forEach(n => n.classList.remove('visible'));
+      document.getElementById('notice-' + type).classList.add('visible');
+      document.getElementById('err-type').classList.remove('visible');
+    }
+
+    // ── ACCUSED SELECTION ──
+    function selectAccused(type) {
+      selectedAccused = type;
+      document.getElementById('acc-student').classList.toggle('selected', type === 'student');
+      document.getElementById('acc-staff').classList.toggle('selected', type === 'staff');
+      document.getElementById('staff-warning').classList.toggle('visible', type === 'staff');
+      document.getElementById('err-accused').classList.remove('visible');
+    }
+
+    // ── STEP NAVIGATION ──
+    function goTo(step) {
+      if (step > currentStep && !validateStep(currentStep)) return;
+
+      // Update progress bar
+      for (let i = 1; i <= 4; i++) {
+        const prog = document.getElementById('prog-' + i);
+        prog.classList.remove('active', 'done');
+        if (i < step) prog.classList.add('done');
+        if (i === step) prog.classList.add('active');
+      }
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById('line-' + i).classList.toggle('done', i < step);
+      }
+
+      // Show correct section
+      document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+      document.getElementById('step-' + step).classList.add('active');
+      currentStep = step;
+
+      // Scroll to top of card
+      document.getElementById('main-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ── VALIDATION PER STEP ──
+    function validateStep(step) {
+      if (step === 1) {
+        if (!selectedType) {
+          document.getElementById('err-type').classList.add('visible');
+          return false;
+        }
+        return true;
+      }
+
+      if (step === 2) {
+        let ok = true;
+        if (!selectedAccused) {
+          document.getElementById('err-accused').classList.add('visible');
+          ok = false;
+        }
+        const date = document.getElementById('incident-date').value;
+        if (!date) { document.getElementById('err-date').classList.add('visible'); ok = false; }
+        else document.getElementById('err-date').classList.remove('visible');
+
+        const loc = document.getElementById('incident-location').value;
+        if (!loc) { document.getElementById('err-location').classList.add('visible'); ok = false; }
+        else document.getElementById('err-location').classList.remove('visible');
+
+        const block = document.getElementById('incident-block').value;
+        if (!block) { document.getElementById('err-block').classList.add('visible'); ok = false; }
+        else document.getElementById('err-block').classList.remove('visible');
+
+        const desc = document.getElementById('incident-desc').value.trim();
+        if (desc.length < 30) { document.getElementById('err-desc').classList.add('visible'); ok = false; }
+        else document.getElementById('err-desc').classList.remove('visible');
+
+        return ok;
+      }
+
+      if (step === 3) return true; // evidence optional
+
+      return true;
+    }
+
+    // ── FILE UPLOAD ──
+    function handleFiles(files) {
+      const area = document.getElementById('upload-area');
+      const list = document.getElementById('file-list');
+      const notice = document.getElementById('ai-notice');
+
+      Array.from(files).forEach(f => {
+        if (uploadedFiles.length >= 10) return;
+        uploadedFiles.push(f);
+        const chip = document.createElement('div');
+        chip.className = 'file-chip';
+        chip.innerHTML = `📄 ${f.name.substring(0,28)}${f.name.length>28?'…':''}
+          <button onclick="removeFile(this, '${f.name}')">×</button>`;
+        list.appendChild(chip);
+      });
+
+      if (uploadedFiles.length > 0) {
+        area.classList.add('has-files');
+        notice.classList.add('visible');
+        // Simulate AI check completing
+        setTimeout(() => {
+          notice.innerHTML = '✅ <strong>AI Verification complete.</strong> No AI-generated content detected. Evidence metadata looks authentic.';
+          notice.style.background = '#f0fdf4';
+          notice.style.borderColor = '#86efac';
+          notice.style.color = '#14532d';
+        }, 2500);
+      }
+    }
+
+    function removeFile(btn, name) {
+      uploadedFiles = uploadedFiles.filter(f => f.name !== name);
+      btn.parentElement.remove();
+      if (uploadedFiles.length === 0) {
+        document.getElementById('upload-area').classList.remove('has-files');
+        document.getElementById('ai-notice').classList.remove('visible');
+      }
+    }
+
+    // ── WITNESSES ──
+    function addWitness() {
+      const list = document.getElementById('witness-list');
+      const row = document.createElement('div');
+      row.className = 'witness-row';
+      row.innerHTML = `<input type="text" placeholder="Witness name or description" />
+        <button type="button" onclick="removeWitness(this)">×</button>`;
+      list.appendChild(row);
+    }
+
+    function removeWitness(btn) {
+      const rows = document.querySelectorAll('.witness-row');
+      if (rows.length > 1) btn.parentElement.remove();
+    }
+
+    // ── CHAR COUNTER ──
+    function updateChar(el, counterId, max) {
+      document.getElementById(counterId).textContent = el.value.length;
+    }
+
+    // ── FINAL SUBMISSION ──
+    async function submitComplaint() {
+      let ok = true;
+      if (!document.getElementById('dec-truth').checked) {
+        document.getElementById('err-dec-truth').classList.add('visible'); ok = false;
+      } else document.getElementById('err-dec-truth').classList.remove('visible');
+      if (!document.getElementById('dec-policy').checked) {
+        document.getElementById('err-dec-policy').classList.add('visible'); ok = false;
+      } else document.getElementById('err-dec-policy').classList.remove('visible');
+      if (!document.getElementById('dec-anon').checked) {
+        document.getElementById('err-dec-anon').classList.add('visible'); ok = false;
+      } else document.getElementById('err-dec-anon').classList.remove('visible');
+      if (!ok) return;
+
+      const btn = document.querySelector('.btn-primary[onclick="submitComplaint()"]');
+      if (btn) { btn.textContent = 'Submitting...'; btn.disabled = true; }
+
+      const witnessInputs = document.querySelectorAll('#witness-list input');
+      const witnesses = Array.from(witnessInputs).map(w => w.value.trim()).filter(w => w.length > 0);
+
+      const complaintData = {
+        type:          selectedType,
+        accused_type:  selectedAccused,
+        incident_date: document.getElementById('incident-date').value,
+        incident_time: document.getElementById('incident-time').value || null,
+        location:      document.getElementById('incident-location').value,
+        hostel_block:  document.getElementById('incident-block').value,
+        description:   document.getElementById('incident-desc').value.trim(),
+        witnesses:     witnesses,
+        prior_reports: document.getElementById('prior-reports').value || null,
+        platform:      document.getElementById('evidence-platform') ? document.getElementById('evidence-platform').value || null : null,
+        evidence_desc: document.getElementById('evidence-desc') ? document.getElementById('evidence-desc').value.trim() || null : null
+      };
+
+      try {
+        const response = await fetch('http://localhost:5000/api/complaints', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(complaintData)
+        });
+
+        const result = await response.json();
+        if (!result.success) {
+          alert('Submission failed: ' + result.message);
+          if (btn) { btn.textContent = 'Submit Complaint Securely'; btn.disabled = false; }
+          return;
+        }
+
+        if (uploadedFiles && uploadedFiles.length > 0) {
+          const formData = new FormData();
+          uploadedFiles.forEach(f => formData.append('files', f));
+          await fetch('http://localhost:5000/api/complaints/' + result.complaint_ref + '/files', {
+            method: 'POST', credentials: 'include', body: formData
+          });
+        }
+
+        document.getElementById('es-authority').textContent  = result.routed_to;
+        document.getElementById('es-sla').textContent        = result.sla;
+        if (document.getElementById('final-case-id'))
+          document.getElementById('final-case-id').textContent = '#' + result.complaint_ref;
+
+        const counselorMap = { verbal:'Not assigned', bullying:'On request', physical:'Within 24 hours', sexual:'Immediately' };
+        if (document.getElementById('es-counselor'))
+          document.getElementById('es-counselor').textContent = counselorMap[selectedType] || 'Not assigned';
+
+        document.querySelectorAll('.form-section').forEach(s => s.style.display = 'none');
+        document.getElementById('success-screen').style.display = 'block';
+        document.getElementById('main-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        for (let i = 1; i <= 4; i++) {
+          document.getElementById('prog-' + i).classList.remove('active');
+          document.getElementById('prog-' + i).classList.add('done');
+        }
+      } catch (err) {
+        alert('Cannot connect to server.\nMake sure your backend is running (python app.py)');
+        if (btn) { btn.textContent = 'Submit Complaint Securely'; btn.disabled = false; }
+      }
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FixMyHostel — Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #eef0f2;
+      --card:    #ffffff;
+      --navy:    #12203a;
+      --blue:    #1a4a9c;
+      --green:   #1e8a45;
+      --text:    #12203a;
+      --muted:   #6b7280;
+      --border:  #d1d5db;
+      --error:   #b91c1c;
+      --radius:  5px;
+      --sidebar: #1a2540;
+    }
+
+    body { font-family: 'Source Sans 3', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ════════════════════════════════
+       LOGIN SCREEN
+    ════════════════════════════════ */
+    #login-screen {
+      min-height: 100vh; display: flex;
+      align-items: center; justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .login-card {
+      background: var(--card); border-radius: 4px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.10);
+      width: 100%; max-width: 420px; overflow: hidden;
+    }
+
+    .top-bar { height: 4px; background: linear-gradient(90deg, var(--blue), var(--green)); }
+
+    .lc-header {
+      padding: 28px 36px 22px; border-bottom: 1px solid #e9eaec; text-align: center;
+    }
+    .lc-logo { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 18px; }
+    .lc-logo img { width: 52px; height: 52px; object-fit: contain; border-radius: 10px; background: #000; padding: 4px; }
+    .lc-brand { text-align: left; }
+    .lc-brand-name { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 700; color: var(--navy); }
+    .lc-brand-sub  { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .lc-header h2  { font-family: 'Playfair Display', serif; font-size: 19px; color: var(--navy); margin-bottom: 5px; }
+    .lc-header p   { font-size: 13px; color: var(--muted); }
+
+    .lc-body { padding: 24px 36px 28px; }
+
+    .form-group { margin-bottom: 17px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+    .form-group input,
+    .form-group select {
+      width: 100%; padding: 10px 13px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      font-family: 'Source Sans 3', sans-serif; font-size: 14px;
+      color: var(--text); background: white; outline: none;
+      -webkit-appearance: none;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    .form-group input:focus,
+    .form-group select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,74,156,0.09); }
+    .form-group input.err { border-color: var(--error); }
+
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 40px; }
+    .pw-eye { position: absolute; right: 11px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 15px; color: var(--muted); padding: 2px; }
+
+    .err-msg { font-size: 12px; color: var(--error); font-weight: 600; margin-top: 4px; display: none; }
+    .err-msg.show { display: block; }
+
+    .btn-full {
+      width: 100%; padding: 12px; background: var(--navy); color: white;
+      border: none; border-radius: var(--radius);
+      font-family: 'Source Sans 3', sans-serif; font-size: 14px; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.04em; text-transform: uppercase;
+      transition: background 0.18s; margin-top: 4px;
+    }
+    .btn-full:hover { background: #1c3159; }
+
+    .lc-foot {
+      padding: 13px 36px; border-top: 1px solid #e9eaec; background: #f8f9fa;
+      text-align: center; font-size: 11px; color: var(--muted); line-height: 1.6;
+    }
+    .lc-foot strong { color: var(--navy); }
+
+    /* role info boxes */
+    .role-info {
+      display: none; background: #eff6ff; border: 1px solid #bfdbfe;
+      border-radius: var(--radius); padding: 10px 13px;
+      font-size: 12px; color: #1e40af; font-weight: 600;
+      line-height: 1.5; margin-top: 8px;
+    }
+    .role-info.show { display: block; }
+
+    /* ════════════════════════════════
+       ADMIN DASHBOARD
+    ════════════════════════════════ */
+    #admin-screen { display: none; }
+
+    .layout { display: flex; min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 220px; background: var(--sidebar); flex-shrink: 0;
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; bottom: 0; left: 0; z-index: 200;
+    }
+
+    .sb-logo {
+      padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sb-logo img { width: 32px; height: 32px; object-fit: contain; border-radius: 6px; background: #000; padding: 2px; }
+    .sb-logo-text { font-family: 'Playfair Display', serif; font-size: 14px; color: white; line-height: 1.2; }
+    .sb-logo-text span { display: block; font-family: 'Source Sans 3', sans-serif; font-size: 10px; color: rgba(255,255,255,0.45); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .sb-role-badge {
+      margin: 14px 16px 6px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 4px; padding: 8px 12px;
+      font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.6);
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .sb-role-badge strong { display: block; font-size: 13px; color: white; margin-bottom: 2px; text-transform: none; letter-spacing: 0; }
+
+    .sb-nav { flex: 1; padding: 8px 0; }
+    .sb-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 20px; font-size: 13px; font-weight: 700;
+      color: rgba(255,255,255,0.55); cursor: pointer;
+      transition: all 0.15s; border-left: 3px solid transparent;
+    }
+    .sb-item:hover { color: white; background: rgba(255,255,255,0.05); }
+    .sb-item.active { color: white; background: rgba(255,255,255,0.08); border-left-color: #4f9ef7; }
+    .sb-item .sb-icon { font-size: 16px; width: 20px; text-align: center; }
+    .sb-badge {
+      margin-left: auto; background: var(--error); color: white;
+      font-size: 10px; font-weight: 800; padding: 2px 7px;
+      border-radius: 20px; min-width: 20px; text-align: center;
+    }
+
+    .sb-logout {
+      padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.4);
+      cursor: pointer; transition: color 0.15s;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .sb-logout:hover { color: white; }
+
+    /* MAIN CONTENT */
+    .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    .topbar {
+      background: white; border-bottom: 1px solid var(--border);
+      padding: 0 28px; height: 54px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .topbar h1 { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--navy); }
+    .topbar-right { display: flex; align-items: center; gap: 14px; font-size: 12px; color: var(--muted); }
+
+    .content { padding: 24px 28px 48px; }
+
+    /* STATS */
+    .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 22px; }
+    .stat-box { background: white; border-radius: 4px; padding: 16px 18px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); border-top: 3px solid var(--border); }
+    .stat-box.red    { border-top-color: var(--error); }
+    .stat-box.amber  { border-top-color: #d97706; }
+    .stat-box.purple { border-top-color: #7c3aed; }
+    .stat-box.green  { border-top-color: var(--green); }
+    .stat-box .sn { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--navy); }
+    .stat-box .sl { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 2px; }
+
+    /* FILTER BAR */
+    .filter-bar {
+      background: white; border-radius: 4px; padding: 12px 18px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.06); margin-bottom: 16px;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+    .filter-bar label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .filter-bar select {
+      padding: 7px 12px; border: 1px solid var(--border); border-radius: var(--radius);
+      font-family: 'Source Sans 3', sans-serif; font-size: 13px; color: var(--text);
+      background: white; outline: none; cursor: pointer; -webkit-appearance: none;
+    }
+    .filter-bar select:focus { border-color: var(--blue); }
+    .filter-count { margin-left: auto; font-size: 12px; color: var(--muted); font-weight: 600; }
+
+    /* TABLE */
+    .table-card { background: white; border-radius: 4px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); overflow: hidden; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: #f8f9fa; border-bottom: 2px solid var(--border); }
+    thead th {
+      padding: 11px 16px; text-align: left;
+      font-size: 11px; font-weight: 800; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid #f0f0f0; transition: background 0.15s; cursor: pointer; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f8faff; }
+    tbody tr.selected { background: #eff6ff; }
+    td { padding: 13px 16px; font-size: 13px; color: var(--text); vertical-align: middle; }
+
+    .td-id { font-family: 'Courier New', monospace; font-weight: 700; color: var(--blue); }
+    .td-type { font-weight: 700; }
+    .td-muted { color: var(--muted); font-size: 12px; }
+
+    /* severity pills */
+    .sev-badge { font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+    .sev-verbal   { background:#dbeafe; color:#1e40af; }
+    .sev-bullying { background:#fef3c7; color:#92400e; }
+    .sev-physical { background:#fee2e2; color:#991b1b; }
+    .sev-sexual   { background:#ede9fe; color:#5b21b6; }
+
+    .status-pill { font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+    .sp-new     { background:#fee2e2; color:#991b1b; }
+    .sp-review  { background:#fffbeb; color:#92400e; }
+    .sp-action  { background:#f5f3ff; color:#5b21b6; }
+    .sp-closed  { background:#f0fdf4; color:#166534; }
+
+    /* CASE DETAIL MODAL */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45); z-index: 500;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: white; border-radius: 4px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+      width: 100%; max-width: 680px;
+      max-height: 88vh; overflow-y: auto;
+      animation: fadeUp 0.25s ease both;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+    .modal-topbar {
+      background: var(--sidebar); padding: 16px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .modal-topbar h2 { font-family: 'Playfair Display', serif; font-size: 17px; color: white; }
+    .modal-topbar .m-id { font-family: 'Courier New', monospace; font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 3px; }
+    .modal-close { background: none; border: none; color: rgba(255,255,255,0.6); font-size: 22px; cursor: pointer; padding: 0; line-height: 1; }
+    .modal-close:hover { color: white; }
+
+    .modal-body { padding: 22px 24px; }
+
+    .m-section { margin-bottom: 22px; }
+    .m-section-title {
+      font-size: 11px; font-weight: 800; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 12px; padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .m-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .m-field { background: #f8f9fa; border-radius: var(--radius); padding: 10px 13px; }
+    .m-field .mf-label { font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .m-field .mf-val   { font-size: 13px; font-weight: 700; color: var(--navy); }
+
+    .m-desc {
+      background: #f8f9fa; border-radius: var(--radius); padding: 13px;
+      font-size: 13px; color: var(--text); line-height: 1.7;
+    }
+
+    /* identity lock box */
+    .identity-lock {
+      background: #f0fdf4; border: 1px solid #86efac;
+      border-radius: var(--radius); padding: 12px 14px;
+      font-size: 12px; color: #166534; font-weight: 600; line-height: 1.5;
+    }
+
+    /* status update */
+    .status-update {
+      display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;
+    }
+    .status-update select {
+      flex: 1; padding: 10px 13px; border: 1px solid var(--border);
+      border-radius: var(--radius); font-family: 'Source Sans 3', sans-serif;
+      font-size: 13px; color: var(--text); background: white; outline: none; -webkit-appearance: none;
+    }
+    .status-update select:focus { border-color: var(--blue); }
+    .btn-update {
+      padding: 10px 18px; background: var(--navy); color: white;
+      border: none; border-radius: var(--radius);
+      font-family: 'Source Sans 3', sans-serif; font-size: 13px; font-weight: 700;
+      cursor: pointer; text-transform: uppercase; letter-spacing: 0.04em;
+      transition: background 0.18s; white-space: nowrap;
+    }
+    .btn-update:hover { background: #1c3159; }
+
+    .btn-escalate {
+      padding: 10px 18px; background: #7c3aed; color: white;
+      border: none; border-radius: var(--radius);
+      font-family: 'Source Sans 3', sans-serif; font-size: 13px; font-weight: 700;
+      cursor: pointer; text-transform: uppercase; letter-spacing: 0.04em;
+      transition: background 0.18s; white-space: nowrap;
+    }
+    .btn-escalate:hover { background: #6d28d9; }
+
+    /* reply box */
+    .reply-box { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-family: 'Source Sans 3', sans-serif; font-size: 13px; color: var(--text); resize: none; outline: none; min-height: 80px; transition: border-color 0.18s; }
+    .reply-box:focus { border-color: var(--blue); }
+    .btn-reply { margin-top: 8px; padding: 9px 20px; background: var(--green); color: white; border: none; border-radius: var(--radius); font-family: 'Source Sans 3', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.04em; transition: background 0.18s; }
+    .btn-reply:hover { background: #166534; }
+    .reply-sent { font-size: 12px; color: var(--green); font-weight: 700; margin-top: 6px; display: none; }
+
+    /* update confirm */
+    .update-confirm { font-size: 12px; color: var(--green); font-weight: 700; margin-top: 8px; display: none; }
+
+    /* evidence list */
+    .ev-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ev-chip { background: #f0f6ff; border: 1px solid #bfdbfe; border-radius: 4px; padding: 6px 12px; font-size: 12px; font-weight: 700; color: var(--blue); }
+
+    /* repeated accused flag */
+    .flag-box { background: #fff7ed; border: 1px solid #fed7aa; border-radius: var(--radius); padding: 12px 14px; font-size: 12px; color: #92400e; font-weight: 600; line-height: 1.5; }
+
+    /* legal bar */
+    .legal-strip { padding: 13px 24px; border-top: 1px solid #e9eaec; background: #f8f9fa; text-align: center; font-size: 11px; color: var(--muted); }
+    .legal-strip strong { color: var(--navy); }
+
+    @media(max-width:800px){
+      .sidebar { width: 0; overflow: hidden; }
+      .main { margin-left: 0; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .content { padding: 16px; }
+      .topbar { padding: 0 16px; }
+    }
+    @media(max-width:520px){
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .m-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     ADMIN LOGIN SCREEN
+════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="top-bar"></div>
+
+    <div class="lc-header">
+      <div class="lc-logo">
+        <img src="Logo.png" alt="FixMyHostel" onerror="this.style.display='none'" />
+        <div class="lc-brand">
+          <div class="lc-brand-name">FixMyHostel</div>
+          <div class="lc-brand-sub">Administration Portal</div>
+        </div>
+      </div>
+      <h2>Admin Login</h2>
+      <p>Authorised personnel only. All access is logged and audited.</p>
+    </div>
+
+    <div class="lc-body">
+
+      <div class="form-group">
+        <label for="a-role">Your Role</label>
+        <select id="a-role" onchange="showRoleInfo()">
+          <option value="">— Select your role —</option>
+          <option value="warden">Hostel Warden</option>
+          <option value="committee">Hostel Committee / Principal</option>
+          <option value="icc">ICC Member (POSH Act)</option>
+        </select>
+        <div class="err-msg" id="err-role">⚠ Please select your role</div>
+
+        <div class="role-info" id="ri-warden">
+          You will only see <strong>Verbal / Cyberbullying</strong> cases assigned to your block.
+        </div>
+        <div class="role-info" id="ri-committee">
+          You will see <strong>Repeated Bullying</strong> and <strong>Physical Assault</strong> cases.
+        </div>
+        <div class="role-info" id="ri-icc">
+          You will only see <strong>Sexual Harassment / Assault</strong> cases as required under the POSH Act.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="a-email">College Email</label>
+        <input type="email" id="a-email" placeholder="yourname@mes.ac.in" />
+        <div class="err-msg" id="err-a-email">⚠ Please enter a valid MES staff email (@mes.ac.in)</div>
+      </div>
+
+      <div class="form-group">
+        <label for="a-pw">Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="a-pw" placeholder="Enter password" />
+          <button class="pw-eye" onclick="togglePw('a-pw',this)" type="button">👁</button>
+        </div>
+        <div class="err-msg" id="err-a-pw">⚠ Please enter your password</div>
+      </div>
+
+      <button class="btn-full" onclick="doAdminLogin()">Login to Admin Panel</button>
+    </div>
+
+    <div class="lc-foot">
+      <strong>Access Notice:</strong> All admin actions are logged with timestamps and staff ID.
+      Unauthorised access attempts will be reported to the institution.
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     ADMIN DASHBOARD
+════════════════════════════════════════ -->
+<div id="admin-screen">
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sb-logo">
+        <img src="Logo.png" alt="logo" onerror="this.style.display='none'" />
+        <div class="sb-logo-text">
+          FixMyHostel
+          <span>Admin Panel</span>
+        </div>
+      </div>
+
+      <div class="sb-role-badge">
+        <strong id="sb-role-name">Warden</strong>
+        Logged in as admin
+      </div>
+
+      <nav class="sb-nav">
+        <div class="sb-item active" onclick="showView('complaints')">
+          <span class="sb-icon">📋</span> Complaints
+          <span class="sb-badge" id="sb-new-count">2</span>
+        </div>
+        <div class="sb-item" onclick="showView('escalations')">
+          <span class="sb-icon">🚨</span> Escalations
+        </div>
+        <div class="sb-item" onclick="showView('patterns')">
+          <span class="sb-icon">🔁</span> Repeat Accused
+        </div>
+      </nav>
+
+      <div class="sb-logout" onclick="doLogout()">⎋ &nbsp;Logout</div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+      <div class="topbar">
+        <h1 id="topbar-title">All Complaints</h1>
+        <div class="topbar-right">
+          <span id="topbar-role-label">Warden — Block B</span>
+          <span>|</span>
+          <span id="topbar-date"></span>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <!-- ── COMPLAINTS VIEW ── -->
+        <div id="view-complaints">
+
+          <!-- Stats -->
+          <div class="stats-grid">
+            <div class="stat-box red">
+              <div class="sn" id="st-new">2</div>
+              <div class="sl">New / Unread</div>
+            </div>
+            <div class="stat-box amber">
+              <div class="sn" id="st-review">3</div>
+              <div class="sl">Under Review</div>
+            </div>
+            <div class="stat-box purple">
+              <div class="sn" id="st-action">1</div>
+              <div class="sl">Action Taken</div>
+            </div>
+            <div class="stat-box green">
+              <div class="sn" id="st-closed">4</div>
+              <div class="sl">Resolved</div>
+            </div>
+          </div>
+
+          <!-- Filter bar -->
+          <div class="filter-bar">
+            <label>Filter:</label>
+            <select id="filter-status" onchange="renderTable()">
+              <option value="all">All Statuses</option>
+              <option value="new">New</option>
+              <option value="review">Under Review</option>
+              <option value="action">Action Taken</option>
+              <option value="closed">Resolved</option>
+            </select>
+            <select id="filter-type" onchange="renderTable()">
+              <option value="all">All Types</option>
+              <option value="verbal">Verbal / Cyber</option>
+              <option value="bullying">Repeated Bullying</option>
+              <option value="physical">Physical Assault</option>
+              <option value="sexual">Sexual Harassment</option>
+            </select>
+            <div class="filter-count" id="filter-count"></div>
+          </div>
+
+          <!-- Table -->
+          <div class="table-card">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Case ID</th>
+                    <th>Type</th>
+                    <th>Date Filed</th>
+                    <th>Location</th>
+                    <th>Accused</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="complaint-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── ESCALATIONS VIEW ── -->
+        <div id="view-escalations" style="display:none;">
+          <div class="table-card" style="padding:24px;">
+            <div style="font-family:'Playfair Display',serif;font-size:17px;color:var(--navy);margin-bottom:6px;">Escalation Queue</div>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Cases that have been escalated to a higher authority or require urgent attention.</p>
+            <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--radius);padding:14px;font-size:13px;color:#92400e;font-weight:600;line-height:1.6;">
+              ⚠️ <strong>FMH-7842</strong> — Physical Assault · Filed 20 Feb 2026 · Awaiting Principal sign-off<br/>
+              ⚠️ <strong>FMH-6631</strong> — Physical Assault · Filed 17 Feb 2026 · Police FIR assistance requested by student
+            </div>
+          </div>
+        </div>
+
+        <!-- ── PATTERNS VIEW ── -->
+        <div id="view-patterns" style="display:none;">
+          <div class="table-card" style="padding:24px;">
+            <div style="font-family:'Playfair Display',serif;font-size:17px;color:var(--navy);margin-bottom:6px;">Repeat Accused Patterns</div>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">System has detected multiple complaints pointing to the same accused individual. Identity of reporters remains hidden.</p>
+            <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:var(--radius);padding:14px;font-size:13px;color:#991b1b;font-weight:600;line-height:1.7;margin-bottom:12px;">
+              🔴 <strong>Accused ID: STU-0492</strong> — 3 separate complaints (Verbal × 2, Bullying × 1) · Recommend formal hearing
+            </div>
+            <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:var(--radius);padding:14px;font-size:13px;color:#92400e;font-weight:600;line-height:1.7;">
+              🟡 <strong>Accused ID: STU-1103</strong> — 2 separate complaints (Verbal × 2) · Monitor closely
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /content -->
+    </div><!-- /main -->
+  </div><!-- /layout -->
+</div><!-- /admin-screen -->
+
+<!-- ════════════════════════════════════════
+     CASE DETAIL MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+
+    <div class="modal-topbar">
+      <div>
+        <h2 id="m-title">Case Detail</h2>
+        <div class="m-id" id="m-id-label">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModalDirect()">×</button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Identity lock -->
+      <div class="identity-lock" style="margin-bottom:20px;">
+        🔒 <strong>Student identity is protected.</strong> You can see the Case ID, incident details, and evidence — but the student's name and personal details are encrypted. They can only be accessed via a formal legal order.
+      </div>
+
+      <!-- Repeat flag (shown if applicable) -->
+      <div class="flag-box" id="m-flag" style="margin-bottom:20px; display:none;">
+        🔁 <strong>Pattern Alert:</strong> The accused in this case has been reported in <span id="m-flag-count">2</span> other complaints. This may indicate a pattern of behaviour.
+      </div>
+
+      <!-- Details -->
+      <div class="m-section">
+        <div class="m-section-title">Incident Details</div>
+        <div class="m-grid">
+          <div class="m-field"><div class="mf-label">Type</div><div class="mf-val" id="m-type">—</div></div>
+          <div class="m-field"><div class="mf-label">Date Filed</div><div class="mf-val" id="m-date">—</div></div>
+          <div class="m-field"><div class="mf-label">Location</div><div class="mf-val" id="m-loc">—</div></div>
+          <div class="m-field"><div class="mf-label">Accused</div><div class="mf-val" id="m-accused">—</div></div>
+          <div class="m-field"><div class="mf-label">Current Status</div><div class="mf-val" id="m-status">—</div></div>
+          <div class="m-field"><div class="mf-label">Evidence Files</div><div class="mf-val" id="m-evidence">—</div></div>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="m-section">
+        <div class="m-section-title">Student's Description</div>
+        <div class="m-desc" id="m-desc">—</div>
+      </div>
+
+      <!-- Evidence -->
+      <div class="m-section" id="m-ev-section" style="display:none;">
+        <div class="m-section-title">Uploaded Evidence</div>
+        <div class="ev-list" id="m-ev-list"></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px;font-weight:600;">✅ AI verification passed — no synthetic content detected</div>
+      </div>
+
+      <!-- Update status -->
+      <div class="m-section">
+        <div class="m-section-title">Update Case Status</div>
+        <div class="status-update">
+          <select id="m-status-select">
+            <option value="new">New</option>
+            <option value="review">Under Review</option>
+            <option value="action">Action Taken</option>
+            <option value="closed">Resolved / Closed</option>
+          </select>
+          <button class="btn-update" onclick="updateStatus()">Update Status</button>
+          <button class="btn-escalate" id="m-escalate-btn" onclick="escalateCase()">↑ Escalate</button>
+        </div>
+        <div class="update-confirm" id="update-confirm">✓ Status updated successfully.</div>
+      </div>
+
+      <!-- Reply to student -->
+      <div class="m-section">
+        <div class="m-section-title">Send Anonymous Message to Student</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px;font-weight:600;">Your message will be delivered to the student via their Case ID. Your identity as admin is shown as "Investigator".</p>
+        <textarea class="reply-box" id="m-reply" placeholder="Type your message to the student — e.g. ask for more information, provide an update on the case..."></textarea>
+        <br/>
+        <button class="btn-reply" onclick="sendReply()">Send Message</button>
+        <div class="reply-sent" id="reply-sent">✓ Message delivered anonymously to the student.</div>
+      </div>
+
+    </div><!-- /modal-body -->
+
+    <div class="legal-strip">
+      <strong>Audit Notice:</strong> All actions taken on this case are logged with your admin ID and timestamp.
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  //  ADMIN PANEL — connected to Flask backend
+  // ============================================================
+  const API = 'http://localhost:5000/api';
+
+  let currentRole       = '';
+  let currentAdminName  = '';
+  let visibleComplaints = [];
+  let activeRef         = null;
+
+  const roleLabels = {
+    warden:    'Hostel Warden',
+    committee: 'Hostel Committee / Principal',
+    icc:       'ICC Member (POSH Act)',
+  };
+
+  const roleNames = {
+    warden:    'Warden',
+    committee: 'Committee',
+    icc:       'ICC Member',
+  };
+
+  const typeLabels = {
+    verbal:   'Verbal / Cyberbullying',
+    bullying: 'Repeated Bullying',
+    physical: 'Physical Assault',
+    sexual:   'Sexual Harassment'
+  };
+
+  const sevClass = {
+    verbal:'sev-verbal', bullying:'sev-bullying',
+    physical:'sev-physical', sexual:'sev-sexual'
+  };
+
+  const spClass = {
+    new:'sp-new', review:'sp-review',
+    action:'sp-action', closed:'sp-closed'
+  };
+
+  const statusLabels = {
+    new:'New', review:'Under Review',
+    action:'Action Taken', closed:'Resolved'
+  };
+
+  // ── Show role info box when role is selected ──────────────
+  function showRoleInfo() {
+    const role = document.getElementById('a-role').value;
+    ['warden','committee','icc'].forEach(r => {
+      document.getElementById('ri-' + r).classList.toggle('show', r === role);
+    });
+  }
+
+  function togglePw(id, btn) {
+    const el = document.getElementById(id);
+    el.type = el.type === 'password' ? 'text' : 'password';
+    btn.textContent = el.type === 'password' ? '\u{1F441}' : '\u{1F648}';
+  }
+
+  // ============================================================
+  //  ADMIN LOGIN — POST /api/admin/login
+  // ============================================================
+  async function doAdminLogin() {
+    const role  = document.getElementById('a-role').value;
+    const email = document.getElementById('a-email').value.trim();
+    const pw    = document.getElementById('a-pw').value;
+
+    const emailOk = /^[^\s@]+@mes\.ac\.in$/.test(email);
+
+    document.getElementById('err-role').classList.toggle('show', !role);
+    document.getElementById('err-a-email').classList.toggle('show', !emailOk);
+    document.getElementById('err-a-pw').classList.toggle('show', !pw);
+    if (!role || !emailOk || !pw) return;
+
+    const btn = document.querySelector('.btn-full');
+    btn.textContent = 'Logging in...';
+    btn.disabled = true;
+
+    try {
+      const response = await fetch(API + '/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ role, email, password: pw })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        currentRole      = result.role;
+        currentAdminName = result.name;
+
+        // Switch from login screen to dashboard
+        document.getElementById('login-screen').style.display  = 'none';
+        document.getElementById('admin-screen').style.display  = 'block';
+        document.getElementById('sb-role-name').textContent    = roleNames[result.role];
+        document.getElementById('topbar-role-label').textContent = roleLabels[result.role];
+        document.getElementById('topbar-date').textContent     =
+          new Date().toLocaleDateString('en-IN', {day:'numeric', month:'long', year:'numeric'});
+
+        // Load complaints from backend
+        loadComplaints();
+      } else {
+        alert('Login failed: ' + result.message);
+        btn.textContent = 'Login to Admin Panel';
+        btn.disabled = false;
+      }
+
+    } catch (err) {
+      alert('Cannot connect to server.\nMake sure backend is running (python app.py)');
+      btn.textContent = 'Login to Admin Panel';
+      btn.disabled = false;
+    }
+  }
+
+  // ============================================================
+  //  LOGOUT — POST /api/admin/logout
+  // ============================================================
+  async function doLogout() {
+    await fetch(API + '/admin/logout', {
+      method: 'POST', credentials: 'include'
+    });
+    document.getElementById('admin-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+
+  // ── Switch sidebar views ───────────────────────────────────
+  function showView(which) {
+    ['complaints','escalations','patterns'].forEach(v => {
+      document.getElementById('view-' + v).style.display = v === which ? 'block' : 'none';
+    });
+    document.querySelectorAll('.sb-item').forEach((el, i) => {
+      el.classList.toggle('active', ['complaints','escalations','patterns'][i] === which);
+    });
+    const titles = {
+      complaints:'All Complaints',
+      escalations:'Escalation Queue',
+      patterns:'Repeat Accused Patterns'
+    };
+    document.getElementById('topbar-title').textContent = titles[which];
+
+    // Load patterns from backend when that view is opened
+    if (which === 'patterns') loadPatterns();
+  }
+
+  // ============================================================
+  //  LOAD COMPLAINTS — GET /api/admin/complaints
+  // ============================================================
+  async function loadComplaints() {
+    const filterStatus = document.getElementById('filter-status').value;
+    const filterType   = document.getElementById('filter-type').value;
+
+    let url = API + '/admin/complaints?status=' + filterStatus + '&type=' + filterType;
+
+    try {
+      const response = await fetch(url, { credentials: 'include' });
+      const result   = await response.json();
+
+      if (!result.success) return;
+
+      visibleComplaints = result.complaints;
+
+      // Update stat boxes
+      document.getElementById('st-new').textContent    = result.stats.new_count    || 0;
+      document.getElementById('st-review').textContent = result.stats.review_count || 0;
+      document.getElementById('st-action').textContent = result.stats.action_count || 0;
+      document.getElementById('st-closed').textContent = result.stats.closed_count || 0;
+      document.getElementById('sb-new-count').textContent = result.stats.new_count || 0;
+      document.getElementById('filter-count').textContent =
+        'Showing ' + visibleComplaints.length + ' case' + (visibleComplaints.length !== 1 ? 's' : '');
+
+      renderTable();
+
+    } catch (err) {
+      console.error('Failed to load complaints', err);
+    }
+  }
+
+  // Alias so filter dropdowns can call this
+  function renderTable() {
+    const tbody = document.getElementById('complaint-tbody');
+
+    if (visibleComplaints.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted);font-size:13px;">No complaints match the current filter.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = visibleComplaints.map(c => `
+      <tr onclick="openModal('${c.complaint_ref}')">
+        <td class="td-id">#${c.complaint_ref}</td>
+        <td class="td-type">
+          <span class="sev-badge ${sevClass[c.type] || ''}">${typeLabels[c.type] || c.type}</span>
+        </td>
+        <td class="td-muted">${formatDate(c.incident_date)}</td>
+        <td class="td-muted">${c.location} · ${c.hostel_block}</td>
+        <td class="td-muted">${c.accused_type === 'staff' ? 'Staff/Warden' : 'Student'}</td>
+        <td><span class="status-pill ${spClass[c.status] || ''}">${statusLabels[c.status] || c.status}</span></td>
+        <td style="color:var(--blue);font-weight:700;font-size:12px;">View →</td>
+      </tr>
+    `).join('');
+  }
+
+  // ============================================================
+  //  OPEN MODAL — GET /api/admin/complaints/<ref>
+  // ============================================================
+  async function openModal(ref) {
+    activeRef = ref;
+
+    try {
+      const response = await fetch(API + '/admin/complaints/' + ref, {
+        credentials: 'include'
+      });
+      const result = await response.json();
+      if (!result.success) return;
+
+      const c = result.complaint;
+
+      document.getElementById('m-title').textContent    = typeLabels[c.type] || c.type;
+      document.getElementById('m-id-label').textContent = '#' + c.complaint_ref;
+      document.getElementById('m-type').textContent     = typeLabels[c.type] || c.type;
+      document.getElementById('m-date').textContent     = formatDate(c.incident_date);
+      document.getElementById('m-loc').textContent      = c.location + ' · ' + c.hostel_block;
+      document.getElementById('m-accused').textContent  = c.accused_type === 'staff' ? 'Staff/Warden' : 'Student';
+      document.getElementById('m-status').innerHTML     = `<span class="status-pill ${spClass[c.status]}">${statusLabels[c.status]}</span>`;
+      document.getElementById('m-evidence').textContent = result.files.length > 0 ? result.files.length + ' file(s)' : 'None uploaded';
+      document.getElementById('m-desc').textContent     = c.description;
+      document.getElementById('m-status-select').value  = c.status;
+
+      // Show repeat pattern flag if applicable
+      const flagEl = document.getElementById('m-flag');
+      if (result.repeat_count > 0) {
+        flagEl.style.display = 'block';
+        document.getElementById('m-flag-count').textContent = result.repeat_count;
+      } else {
+        flagEl.style.display = 'none';
+      }
+
+      // Show evidence files
+      const evSection = document.getElementById('m-ev-section');
+      if (result.files.length > 0) {
+        evSection.style.display = 'block';
+        document.getElementById('m-ev-list').innerHTML = result.files.map(f =>
+          `<div class="ev-chip">\u{1F4CE} ${f}</div>`
+        ).join('');
+      } else {
+        evSection.style.display = 'none';
+      }
+
+      // Hide escalate button for ICC (already highest level)
+      document.getElementById('m-escalate-btn').style.display =
+        currentRole === 'icc' ? 'none' : 'inline-block';
+
+      // Reset reply/confirm boxes
+      document.getElementById('m-reply').value = '';
+      document.getElementById('reply-sent').style.display   = 'none';
+      document.getElementById('update-confirm').style.display = 'none';
+
+      document.getElementById('modal-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+
+    } catch (err) {
+      alert('Could not load complaint details.');
+    }
+  }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModalDirect();
+  }
+  function closeModalDirect() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // ============================================================
+  //  UPDATE STATUS — PUT /api/admin/complaints/<ref>/status
+  // ============================================================
+  async function updateStatus() {
+    if (!activeRef) return;
+    const newStatus = document.getElementById('m-status-select').value;
+
+    try {
+      const response = await fetch(API + '/admin/complaints/' + activeRef + '/status', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update badge in modal
+        document.getElementById('m-status').innerHTML =
+          `<span class="status-pill ${spClass[newStatus]}">${statusLabels[newStatus]}</span>`;
+
+        // Show confirm message
+        document.getElementById('update-confirm').style.display = 'block';
+        setTimeout(() => document.getElementById('update-confirm').style.display = 'none', 3000);
+
+        // Reload table in background
+        loadComplaints();
+      } else {
+        alert('Update failed: ' + result.message);
+      }
+
+    } catch (err) {
+      alert('Could not update status. Make sure backend is running.');
+    }
+  }
+
+  // ============================================================
+  //  ESCALATE — POST /api/admin/complaints/<ref>/escalate
+  // ============================================================
+  async function escalateCase() {
+    if (!activeRef) return;
+
+    try {
+      const response = await fetch(API + '/admin/complaints/' + activeRef + '/escalate', {
+        method: 'POST',
+        credentials: 'include'
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert('✅ ' + result.message);
+        closeModalDirect();
+        loadComplaints();
+      } else {
+        alert('❌ ' + result.message);
+      }
+
+    } catch (err) {
+      alert('Could not escalate. Make sure backend is running.');
+    }
+  }
+
+  // ============================================================
+  //  SEND REPLY — POST /api/admin/complaints/<ref>/message
+  // ============================================================
+  async function sendReply() {
+    const val = document.getElementById('m-reply').value.trim();
+    if (!val || !activeRef) return;
+
+    try {
+      const response = await fetch(API + '/admin/complaints/' + activeRef + '/message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ content: val })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        document.getElementById('m-reply').value = '';
+        document.getElementById('reply-sent').style.display = 'block';
+        setTimeout(() => document.getElementById('reply-sent').style.display = 'none', 4000);
+      }
+
+    } catch (err) {
+      alert('Could not send message. Make sure backend is running.');
+    }
+  }
+
+  // ============================================================
+  //  LOAD PATTERNS — GET /api/admin/patterns
+  // ============================================================
+  async function loadPatterns() {
+    try {
+      const response = await fetch(API + '/admin/patterns', { credentials: 'include' });
+      const result   = await response.json();
+      if (!result.success) return;
+
+      const container = document.getElementById('view-patterns');
+      const box = container.querySelector('.table-card');
+
+      if (result.patterns.length === 0) {
+        box.innerHTML += '<p style="font-size:13px;color:var(--muted);margin-top:12px;">No repeat patterns detected yet.</p>';
+        return;
+      }
+
+      // Build pattern cards dynamically
+      let html = result.patterns.map(p => `
+        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:var(--radius);
+                    padding:14px;font-size:13px;color:#991b1b;font-weight:600;
+                    line-height:1.7;margin-bottom:12px;">
+          &#x1F534; <strong>${p.hostel_block}</strong> —
+          ${typeLabels[p.type] || p.type} · ${p.count} complaints
+        </div>
+      `).join('');
+
+      const existing = box.querySelectorAll('[style*="fee2e2"], [style*="fef3c7"]');
+      existing.forEach(e => e.remove());
+      box.insertAdjacentHTML('beforeend', html);
+
+    } catch (err) {
+      console.error('Could not load patterns', err);
+    }
+  }
+
+  // ── Format date nicely ─────────────────────────────────────
+  function formatDate(dateStr) {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    if (isNaN(d)) return dateStr;
+    return d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+  }
+</script>
+</body>
+</html>

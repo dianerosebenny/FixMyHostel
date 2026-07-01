@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FixMyHostel — Forgot Password</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:     #eef0f2;
+      --card:   #ffffff;
+      --navy:   #12203a;
+      --blue:   #1a4a9c;
+      --green:  #1e8a45;
+      --text:   #12203a;
+      --muted:  #6b7280;
+      --border: #d1d5db;
+      --error:  #b91c1c;
+      --radius: 5px;
+    }
+
+    body {
+      font-family: 'Source Sans 3', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px 48px;
+      color: var(--text);
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 4px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.10);
+      width: 100%;
+      max-width: 440px;
+      overflow: hidden;
+    }
+
+    .top-bar { height: 4px; background: linear-gradient(90deg, var(--blue), var(--green)); }
+
+    .card-header {
+      padding: 28px 36px 22px;
+      border-bottom: 1px solid #e9eaec;
+      text-align: center;
+    }
+
+    .logo-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; margin-bottom: 18px;
+    }
+    .logo-row img {
+      width: 52px; height: 52px;
+      object-fit: contain; border-radius: 10px;
+      background: #000; padding: 4px;
+    }
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 19px; font-weight: 700; color: var(--navy);
+      line-height: 1.2; text-align: left;
+    }
+    .brand-sub {
+      font-size: 11px; color: var(--muted); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    .card-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; color: var(--navy); margin-bottom: 6px;
+    }
+    .card-header p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+    /* STEP INDICATOR */
+    .indicator-wrap { padding: 20px 36px 0; }
+    .step-indicator {
+      display: flex; align-items: center; justify-content: center; gap: 0;
+      margin-bottom: 6px;
+    }
+    .si-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; color: var(--muted);
+      background: white; transition: all 0.2s; flex-shrink: 0;
+    }
+    .si-dot.active { border-color: var(--blue); color: var(--blue); background: #eff6ff; }
+    .si-dot.done   { border-color: var(--green); background: var(--green); color: white; }
+    .si-line {
+      width: 48px; height: 2px;
+      background: var(--border); transition: background 0.2s;
+    }
+    .si-line.done { background: var(--green); }
+    .si-labels {
+      display: flex; justify-content: space-between;
+      font-size: 11px; font-weight: 700; color: var(--muted);
+      margin-bottom: 4px; padding: 0 2px;
+    }
+
+    /* STEPS */
+    .step { display: none; padding: 24px 36px 32px; }
+    .step.active { display: block; }
+
+    /* FORM */
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block; font-size: 13px; font-weight: 700;
+      color: var(--navy); margin-bottom: 6px;
+    }
+    .form-group input {
+      width: 100%; padding: 10px 13px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      font-family: 'Source Sans 3', sans-serif; font-size: 14px;
+      color: var(--text); background: white; outline: none;
+      transition: border-color 0.18s, box-shadow 0.18s;
+      -webkit-appearance: none;
+    }
+    .form-group input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(26,74,156,0.09);
+    }
+    .form-group input.err { border-color: var(--error); }
+
+    .err-msg {
+      font-size: 12px; color: var(--error);
+      font-weight: 600; margin-top: 4px; display: none;
+    }
+    .err-msg.show { display: block; }
+    .field-note { font-size: 11px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+
+    /* OTP */
+    .otp-row {
+      display: flex; gap: 10px; justify-content: center; margin-bottom: 6px;
+    }
+    .otp-row input {
+      width: 48px; height: 52px; text-align: center;
+      font-size: 20px; font-weight: 800;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      font-family: 'Source Sans 3', sans-serif; color: var(--navy);
+      outline: none; transition: border-color 0.18s, box-shadow 0.18s;
+      -webkit-appearance: none;
+    }
+    .otp-row input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(26,74,156,0.09);
+    }
+    .otp-row input.err { border-color: var(--error); }
+
+    .resend-row {
+      text-align: center; font-size: 12px;
+      color: var(--muted); margin-bottom: 20px;
+    }
+    .resend-row button {
+      background: none; border: none; cursor: pointer;
+      color: var(--blue); font-weight: 700; font-size: 12px;
+      font-family: 'Source Sans 3', sans-serif;
+    }
+    .resend-row button:disabled { color: var(--muted); cursor: default; }
+    .resend-row button:hover:not(:disabled) { text-decoration: underline; }
+
+    .info-box {
+      background: #eff6ff; border: 1px solid #bfdbfe;
+      border-radius: var(--radius); padding: 12px 14px;
+      font-size: 12px; color: #1e40af;
+      line-height: 1.6; margin-bottom: 20px; font-weight: 600;
+    }
+
+    /* Password */
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 40px; }
+    .pw-eye {
+      position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      font-size: 15px; color: var(--muted); padding: 2px;
+    }
+    .str-bar { height: 3px; background: #e5e7eb; border-radius: 3px; margin-top: 7px; overflow: hidden; }
+    .str-fill { height: 100%; width: 0; border-radius: 3px; transition: width 0.3s, background 0.3s; }
+    .str-label { font-size: 11px; color: var(--muted); margin-top: 3px; font-weight: 600; }
+
+    /* Success */
+    .success-state { text-align: center; padding: 8px 0 16px; }
+    .success-state .s-icon { font-size: 44px; margin-bottom: 14px; }
+    .success-state h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; color: var(--navy); margin-bottom: 8px;
+    }
+    .success-state p { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+
+    /* Buttons */
+    .btn {
+      width: 100%; padding: 12px;
+      background: var(--navy); color: white;
+      border: none; border-radius: var(--radius);
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.04em;
+      text-transform: uppercase; transition: background 0.18s;
+    }
+    .btn:hover { background: #1c3159; }
+    .btn.green { background: var(--green); }
+    .btn.green:hover { background: #166534; }
+
+    .back-link {
+      text-align: center; margin-top: 16px;
+      font-size: 13px; color: var(--muted);
+    }
+    .back-link a { color: var(--blue); font-weight: 700; text-decoration: none; }
+    .back-link a:hover { text-decoration: underline; }
+
+    .legal {
+      padding: 13px 36px; border-top: 1px solid #e9eaec;
+      background: #f8f9fa; text-align: center;
+      font-size: 11px; color: var(--muted); line-height: 1.6;
+    }
+    .legal strong { color: var(--navy); }
+
+    .page-foot { margin-top: 18px; font-size: 11px; color: #9ca3af; text-align: center; }
+
+    @media(max-width:480px){
+      .step { padding: 20px 20px 26px; }
+      .card-header { padding: 22px 20px 18px; }
+      .indicator-wrap { padding: 16px 20px 0; }
+      .legal { padding: 13px 20px; }
+      .otp-row input { width: 40px; height: 46px; font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="top-bar"></div>
+
+  <div class="card-header">
+    <div class="logo-row">
+      <img src="Logo.png" alt="FixMyHostel" onerror="this.style.display='none'" />
+      <div>
+        <div class="brand-name">FixMyHostel</div>
+        <div class="brand-sub">Student Safety Portal</div>
+      </div>
+    </div>
+    <h2>Reset Your Password</h2>
+    <p>Enter your registered MES college email and we'll send you a verification code.</p>
+  </div>
+
+  <!-- STEP INDICATOR -->
+  <div class="indicator-wrap" id="indicator-wrap">
+    <div class="step-indicator">
+      <div class="si-dot active" id="dot-1">1</div>
+      <div class="si-line" id="line-1"></div>
+      <div class="si-dot" id="dot-2">2</div>
+      <div class="si-line" id="line-2"></div>
+      <div class="si-dot" id="dot-3">3</div>
+    </div>
+    <div class="si-labels">
+      <span>Enter Email</span>
+      <span>Verify OTP</span>
+      <span>New Password</span>
+    </div>
+  </div>
+
+  <!-- STEP 1: Email -->
+  <div class="step active" id="step-1">
+    <div class="form-group">
+      <label for="fp-email">College Email Address</label>
+      <input type="email" id="fp-email" placeholder="yourname@student.mes.ac.in" />
+      <div class="err-msg" id="err-email">⚠ Please enter a valid MES email (@student.mes.ac.in or @mes.ac.in)</div>
+      <div class="field-note">A 6-digit OTP will be sent to this email address.</div>
+    </div>
+    <button class="btn" onclick="sendOTP()">Send Verification Code</button>
+    <div class="back-link">
+      Remembered your password? <a href="studentlogin.html">← Back to Login</a>
+    </div>
+  </div>
+
+  <!-- STEP 2: OTP -->
+  <div class="step" id="step-2">
+    <div class="info-box">
+      A 6-digit code has been sent to <strong id="email-display">—</strong>. Check your inbox and enter the code below.
+    </div>
+    <div class="form-group">
+      <label>Enter Verification Code</label>
+      <div class="otp-row">
+        <input type="text" maxlength="1" id="otp-1" oninput="otpMove(this,null,'otp-2')"    onkeydown="otpBack(event,null,'otp-1')" />
+        <input type="text" maxlength="1" id="otp-2" oninput="otpMove(this,'otp-1','otp-3')" onkeydown="otpBack(event,'otp-1','otp-2')" />
+        <input type="text" maxlength="1" id="otp-3" oninput="otpMove(this,'otp-2','otp-4')" onkeydown="otpBack(event,'otp-2','otp-3')" />
+        <input type="text" maxlength="1" id="otp-4" oninput="otpMove(this,'otp-3','otp-5')" onkeydown="otpBack(event,'otp-3','otp-4')" />
+        <input type="text" maxlength="1" id="otp-5" oninput="otpMove(this,'otp-4','otp-6')" onkeydown="otpBack(event,'otp-4','otp-5')" />
+        <input type="text" maxlength="1" id="otp-6" oninput="otpMove(this,'otp-5',null)"    onkeydown="otpBack(event,'otp-5','otp-6')" />
+      </div>
+      <div class="err-msg" id="err-otp">⚠ Please enter the complete 6-digit code</div>
+    </div>
+    <div class="resend-row">
+      Didn't receive it? &nbsp;
+      <button id="resend-btn" onclick="resendOTP()" disabled>
+        Resend in <span id="countdown">30</span>s
+      </button>
+    </div>
+    <button class="btn" onclick="verifyOTP()">Verify Code</button>
+    <div class="back-link">
+      <a href="#" onclick="goStep(1);return false;">← Use a different email</a>
+    </div>
+  </div>
+
+  <!-- STEP 3: New Password -->
+  <div class="step" id="step-3">
+    <div class="form-group">
+      <label for="np-pw">New Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="np-pw" placeholder="Minimum 8 characters" oninput="checkStr(this.value)" />
+        <button class="pw-eye" onclick="togglePw('np-pw',this)" type="button">👁</button>
+      </div>
+      <div class="str-bar"><div class="str-fill" id="str-fill"></div></div>
+      <div class="str-label" id="str-label">Password strength</div>
+      <div class="err-msg" id="err-np-pw">⚠ Password must be at least 8 characters</div>
+    </div>
+    <div class="form-group">
+      <label for="np-pw2">Confirm New Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="np-pw2" placeholder="Re-enter your new password" />
+        <button class="pw-eye" onclick="togglePw('np-pw2',this)" type="button">👁</button>
+      </div>
+      <div class="err-msg" id="err-np-pw2">⚠ Passwords do not match</div>
+    </div>
+    <button class="btn green" onclick="resetPassword()">Reset Password</button>
+  </div>
+
+  <!-- STEP 4: Success -->
+  <div class="step" id="step-4">
+    <div class="success-state">
+      <div class="s-icon">✅</div>
+      <h3>Password Reset Successfully</h3>
+      <p>Your password has been updated. You can now log in with your new password.</p>
+      <!-- This button takes them back to the login page -->
+      <button class="btn" onclick="window.location.href='studentlogin.html'">Go to Login →</button>
+    </div>
+  </div>
+
+  <div class="legal">
+    <strong>Security Notice:</strong> If you did not request a password reset, please ignore this page. Your account remains secure.
+  </div>
+</div>
+
+<div class="page-foot">© 2026 FixMyHostel · Student Safety Portal · All rights reserved</div>
+
+<script>
+  // ============================================================
+  //  FORGOT PASSWORD — connected to Flask backend
+  //  Step 1: Enter email → Step 2: Enter OTP → Step 3: New password
+  // ============================================================
+  const API = 'http://localhost:5000/api';
+  let timerInterval = null;
+  let verifiedEmail = '';   // stores email after OTP is verified
+
+  // ── Move between steps ────────────────────────────────────
+  function goStep(n) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step-' + n).classList.add('active');
+    document.getElementById('indicator-wrap').style.display = n === 4 ? 'none' : 'block';
+    updateIndicator(n);
+  }
+
+  function updateIndicator(n) {
+    for (let i = 1; i <= 3; i++) {
+      const dot  = document.getElementById('dot-' + i);
+      const line = document.getElementById('line-' + i);
+      dot.classList.remove('active','done');
+      if (line) line.classList.remove('done');
+      if (i < n)  { dot.classList.add('done');   if (line) line.classList.add('done'); }
+      if (i === n) dot.classList.add('active');
+    }
+  }
+
+  // ============================================================
+  //  STEP 1: Send OTP — POST /api/forgot-password
+  // ============================================================
+  async function sendOTP() {
+    const email = document.getElementById('fp-email').value.trim();
+    const valid = /^[^\s@]+@(student\.mes\.ac\.in|mes\.ac\.in)$/.test(email);
+
+    document.getElementById('err-email').classList.toggle('show', !valid);
+    document.getElementById('fp-email').classList.toggle('err', !valid);
+    if (!valid) return;
+
+    const btn = document.querySelector('#step-1 .btn');
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    try {
+      const response = await fetch(API + '/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email })
+      });
+
+      const result = await response.json();
+
+      // Always move to step 2 (security: don't reveal if email exists)
+      verifiedEmail = email;
+      document.getElementById('email-display').textContent = email;
+      goStep(2);
+      startCountdown();
+      setTimeout(() => document.getElementById('otp-1').focus(), 200);
+
+    } catch (err) {
+      alert('Cannot connect to server.\nMake sure backend is running (python app.py)');
+    }
+
+    btn.textContent = 'Send Verification Code';
+    btn.disabled = false;
+  }
+
+  // ── Countdown timer for resend button ─────────────────────
+  function startCountdown() {
+    let secs = 30;
+    const btn = document.getElementById('resend-btn');
+    btn.disabled = true;
+    btn.innerHTML = 'Resend in <span id="countdown">30</span>s';
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      secs--;
+      const span = document.getElementById('countdown');
+      if (span) span.textContent = secs;
+      if (secs <= 0) {
+        clearInterval(timerInterval);
+        btn.disabled = false;
+        btn.textContent = 'Resend Code';
+      }
+    }, 1000);
+  }
+
+  async function resendOTP() {
+    for (let i = 1; i <= 6; i++) {
+      document.getElementById('otp-' + i).value = '';
+      document.getElementById('otp-' + i).classList.remove('err');
+    }
+    document.getElementById('otp-1').focus();
+
+    // Call the backend again to send a new OTP
+    await fetch(API + '/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email: verifiedEmail })
+    });
+
+    startCountdown();
+  }
+
+  // ── OTP input helpers (auto-move between boxes) ───────────
+  function otpMove(el, prevId, nextId) {
+    el.value = el.value.replace(/[^0-9]/g, '');
+    if (el.value && nextId) document.getElementById(nextId).focus();
+  }
+
+  function otpBack(e, prevId, currentId) {
+    if (e.key === 'Backspace' && !document.getElementById(currentId).value && prevId)
+      document.getElementById(prevId).focus();
+  }
+
+  // ============================================================
+  //  STEP 2: Verify OTP — POST /api/verify-otp
+  // ============================================================
+  async function verifyOTP() {
+    let allFilled = true;
+    let otpValue  = '';
+
+    for (let i = 1; i <= 6; i++) {
+      const val = document.getElementById('otp-' + i).value;
+      if (!val) allFilled = false;
+      document.getElementById('otp-' + i).classList.toggle('err', !val);
+      otpValue += val;
+    }
+
+    document.getElementById('err-otp').classList.toggle('show', !allFilled);
+    if (!allFilled) return;
+
+    const btn = document.querySelector('#step-2 .btn');
+    btn.textContent = 'Verifying...';
+    btn.disabled = true;
+
+    try {
+      const response = await fetch(API + '/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email: verifiedEmail, otp: otpValue })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        clearInterval(timerInterval);
+        goStep(3);
+        setTimeout(() => document.getElementById('np-pw').focus(), 200);
+      } else {
+        document.getElementById('err-otp').textContent = '⚠ ' + result.message;
+        document.getElementById('err-otp').classList.add('show');
+        // Shake all OTP boxes to indicate error
+        for (let i = 1; i <= 6; i++) {
+          document.getElementById('otp-' + i).classList.add('err');
+        }
+      }
+
+    } catch (err) {
+      alert('Cannot connect to server. Make sure backend is running.');
+    }
+
+    btn.textContent = 'Verify Code';
+    btn.disabled = false;
+  }
+
+  // ── Toggle password visibility ────────────────────────────
+  function togglePw(id, btn) {
+    const el = document.getElementById(id);
+    el.type = el.type === 'password' ? 'text' : 'password';
+    btn.textContent = el.type === 'password' ? '\u{1F441}' : '\u{1F648}';
+  }
+
+  // ── Password strength meter ───────────────────────────────
+  function checkStr(pw) {
+    const score = [pw.length>=8, /[A-Z]/.test(pw), /[0-9]/.test(pw), /[^A-Za-z0-9]/.test(pw)].filter(Boolean).length;
+    const levels = [
+      { w:'0%',   c:'#e5e7eb', t:'Password strength' },
+      { w:'25%',  c:'#dc2626', t:'Weak' },
+      { w:'50%',  c:'#f97316', t:'Fair' },
+      { w:'75%',  c:'#eab308', t:'Good' },
+      { w:'100%', c:'#16a34a', t:'Strong ✓' },
+    ];
+    const l = levels[score];
+    document.getElementById('str-fill').style.width = l.w;
+    document.getElementById('str-fill').style.background = l.c;
+    document.getElementById('str-label').textContent = l.t;
+    document.getElementById('str-label').style.color = l.c;
+  }
+
+  // ============================================================
+  //  STEP 3: Reset Password — POST /api/reset-password
+  // ============================================================
+  async function resetPassword() {
+    const pw  = document.getElementById('np-pw').value;
+    const pw2 = document.getElementById('np-pw2').value;
+    const pwOk  = pw.length >= 8;
+    const pw2Ok = pw === pw2 && pw2.length > 0;
+
+    document.getElementById('np-pw').classList.toggle('err', !pwOk);
+    document.getElementById('err-np-pw').classList.toggle('show', !pwOk);
+    document.getElementById('np-pw2').classList.toggle('err', !pw2Ok);
+    document.getElementById('err-np-pw2').classList.toggle('show', !pw2Ok);
+    if (!pwOk || !pw2Ok) return;
+
+    const btn = document.querySelector('#step-3 .btn');
+    btn.textContent = 'Resetting...';
+    btn.disabled = true;
+
+    try {
+      const response = await fetch(API + '/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ password: pw })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        goStep(4);   // Show success screen
+      } else {
+        alert('Reset failed: ' + result.message);
+        btn.textContent = 'Reset Password';
+        btn.disabled = false;
+      }
+
+    } catch (err) {
+      alert('Cannot connect to server. Make sure backend is running.');
+      btn.textContent = 'Reset Password';
+      btn.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>

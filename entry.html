@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FixMyHostel — Portal Selection</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:     #eef0f2;
+      --card:   #ffffff;
+      --navy:   #12203a;
+      --blue:   #1a4a9c;
+      --green:  #1e8a45;
+      --text:   #12203a;
+      --muted:  #6b7280;
+      --border: #d1d5db;
+      --radius: 5px;
+    }
+
+    body {
+      font-family: 'Source Sans 3', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px 48px;
+      color: var(--text);
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 4px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.10);
+      width: 100%;
+      max-width: 500px;
+      overflow: hidden;
+      animation: fadeUp 0.45s ease forwards;
+      opacity: 0;
+      transform: translateY(18px);
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .top-bar {
+      height: 4px;
+      background: linear-gradient(90deg, var(--blue), var(--green));
+    }
+
+    .card-header {
+      padding: 32px 40px 24px;
+      border-bottom: 1px solid #e9eaec;
+      text-align: center;
+    }
+
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 18px;
+    }
+
+    .card-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 21px;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+
+    .card-header p {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .portals {
+      padding: 32px 40px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .portal-btn {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 20px 22px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      background: white;
+      cursor: pointer;
+      text-align: left;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .portal-btn::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .portal-btn.student::before { background: var(--blue); }
+    .portal-btn.admin::before   { background: var(--green); }
+
+    .portal-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.09);
+    }
+
+    .portal-btn.student:hover { border-color: var(--blue); }
+    .portal-btn.admin:hover   { border-color: var(--green); }
+
+    .portal-btn:hover::before { opacity: 1; }
+
+    .portal-icon {
+      width: 46px; height: 46px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .portal-btn.student .portal-icon { background: #eff4ff; }
+    .portal-btn.admin   .portal-icon { background: #f0fdf4; }
+
+    .portal-info { flex: 1; }
+
+    .portal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      color: var(--navy);
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .portal-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .portal-arrow {
+      font-size: 18px;
+      color: var(--muted);
+      transition: color 0.2s, transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    .portal-btn:hover .portal-arrow {
+      transform: translateX(3px);
+    }
+
+    .portal-btn.student:hover .portal-arrow { color: var(--blue); }
+    .portal-btn.admin:hover   .portal-arrow { color: var(--green); }
+
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 11px; color: var(--muted); font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    .legal {
+      padding: 13px 40px;
+      border-top: 1px solid #e9eaec;
+      background: #f8f9fa;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .legal strong { color: var(--navy); }
+
+    .page-foot {
+      margin-top: 18px;
+      font-size: 11px;
+      color: #9ca3af;
+      text-align: center;
+    }
+
+    @media(max-width:480px) {
+      .portals { padding: 24px 20px 28px; }
+      .card-header { padding: 24px 20px 20px; }
+      .legal { padding: 13px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="top-bar"></div>
+
+  <div class="card-header">
+    <div class="brand-name">FixMyHostel</div>
+    <div class="brand-sub">Hostel Management System</div>
+    <h2>Welcome Back</h2>
+    <p>Choose your portal to continue</p>
+  </div>
+
+  <div class="portals">
+
+    <a class="portal-btn student" href="studentlogin.html">
+      <div class="portal-icon">🎓</div>
+      <div class="portal-info">
+        <div class="portal-title">Student Portal</div>
+        <div class="portal-desc">Submit complaints, track your cases, and report hostel issues anonymously.</div>
+      </div>
+      <div class="portal-arrow">→</div>
+    </a>
+
+    <div class="divider">or</div>
+
+    <a class="portal-btn admin" href="admin.html">
+      <div class="portal-icon">🛡️</div>
+      <div class="portal-info">
+        <div class="portal-title">Admin Portal</div>
+        <div class="portal-desc">Authorised personnel only. Manage complaints, staff, and hostel operations.</div>
+      </div>
+      <div class="portal-arrow">→</div>
+    </a>
+
+  </div>
+
+  <div class="legal">
+    <strong>Confidentiality Notice:</strong> All submissions are encrypted. Your identity is protected and will not be
+    disclosed without a legal order. False reports are subject to disciplinary action.
+  </div>
+</div>
+
+<div class="page-foot">© 2026 FixMyHostel · Student Safety Portal · All rights reserved</div>
+
+</body>
+</html>

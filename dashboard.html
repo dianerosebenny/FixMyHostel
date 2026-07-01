@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FixMyHostel — My Dashboard</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #eef0f2;
+      --card:    #ffffff;
+      --navy:    #12203a;
+      --blue:    #1a4a9c;
+      --green:   #1e8a45;
+      --text:    #12203a;
+      --muted:   #6b7280;
+      --border:  #d1d5db;
+      --error:   #b91c1c;
+      --radius:  5px;
+
+      --status-open:       #1a4a9c;
+      --status-open-bg:    #eff6ff;
+      --status-review:     #d97706;
+      --status-review-bg:  #fffbeb;
+      --status-action:     #7c3aed;
+      --status-action-bg:  #f5f3ff;
+      --status-closed:     #1e8a45;
+      --status-closed-bg:  #f0fdf4;
+    }
+
+    body {
+      font-family: 'Source Sans 3', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── TOPNAV ── */
+    .topnav {
+      background: var(--navy);
+      padding: 0 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 58px;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+
+    .nav-left { display: flex; align-items: center; gap: 12px; }
+    .nav-logo-img {
+      width: 34px; height: 34px;
+      object-fit: contain; border-radius: 6px;
+      background: #000; padding: 2px;
+    }
+    .nav-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px; font-weight: 700; color: white; line-height: 1.2;
+    }
+    .nav-brand span {
+      display: block; font-family: 'Source Sans 3', sans-serif;
+      font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.5);
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+
+    .nav-caseid {
+      font-family: 'Courier New', monospace;
+      font-size: 12px; font-weight: 700;
+      color: rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.08);
+      padding: 5px 12px; border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .nav-caseid strong { color: white; }
+
+    .nav-logout {
+      font-size: 12px; font-weight: 700;
+      color: rgba(255,255,255,0.6); cursor: pointer;
+      background: none; border: none;
+      font-family: 'Source Sans 3', sans-serif;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      transition: color 0.15s;
+    }
+    .nav-logout:hover { color: white; }
+
+    /* ── PAGE BODY ── */
+    .page { max-width: 960px; margin: 0 auto; padding: 28px 20px 60px; }
+
+    /* ── WELCOME STRIP ── */
+    .welcome {
+      background: var(--card);
+      border-radius: 4px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+      padding: 20px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+      border-left: 4px solid var(--blue);
+    }
+    .welcome-text h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px; color: var(--navy); margin-bottom: 3px;
+    }
+    .welcome-text p { font-size: 13px; color: var(--muted); }
+
+    .btn-new {
+      padding: 10px 20px;
+      background: var(--navy); color: white;
+      border: none; border-radius: var(--radius);
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 13px; font-weight: 700;
+      cursor: pointer; text-transform: uppercase;
+      letter-spacing: 0.04em; white-space: nowrap;
+      transition: background 0.18s;
+      text-decoration: none; display: inline-block;
+    }
+    .btn-new:hover { background: #1c3159; }
+
+    /* ── STATS ROW ── */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+
+    .stat-card {
+      background: var(--card); border-radius: 4px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+      padding: 16px 18px;
+      border-top: 3px solid var(--border);
+    }
+    .stat-card.blue  { border-top-color: var(--blue); }
+    .stat-card.amber { border-top-color: #d97706; }
+    .stat-card.purple{ border-top-color: #7c3aed; }
+    .stat-card.green { border-top-color: var(--green); }
+
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px; font-weight: 700; color: var(--navy);
+      margin-bottom: 2px;
+    }
+    .stat-label { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+    /* ── MAIN GRID ── */
+    .grid { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+
+    /* ── COMPLAINTS LIST ── */
+    .section-card {
+      background: var(--card);
+      border-radius: 4px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .section-header h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px; color: var(--navy);
+    }
+    .section-header span {
+      font-size: 11px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    /* ── COMPLAINT ITEM ── */
+    .complaint-item {
+      padding: 16px 22px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .complaint-item:last-child { border-bottom: none; }
+    .complaint-item:hover { background: #fafafa; }
+    .complaint-item.active { background: #f0f6ff; border-left: 3px solid var(--blue); }
+
+    .ci-top {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 6px;
+    }
+    .ci-id {
+      font-family: 'Courier New', monospace;
+      font-size: 13px; font-weight: 700; color: var(--blue);
+    }
+    .ci-date { font-size: 11px; color: var(--muted); }
+
+    .ci-type {
+      font-size: 13px; font-weight: 700; color: var(--navy);
+      margin-bottom: 4px;
+    }
+    .ci-desc {
+      font-size: 12px; color: var(--muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-width: 380px;
+    }
+
+    .ci-bottom {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-top: 8px;
+    }
+
+    /* Status badges */
+    .status-badge {
+      font-size: 10px; font-weight: 800;
+      padding: 3px 10px; border-radius: 20px;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .s-open    { background: var(--status-open-bg);   color: var(--status-open); }
+    .s-review  { background: var(--status-review-bg); color: var(--status-review); }
+    .s-action  { background: var(--status-action-bg); color: var(--status-action); }
+    .s-closed  { background: var(--status-closed-bg); color: var(--status-closed); }
+
+    .ci-authority { font-size: 11px; color: var(--muted); }
+
+    /* empty state */
+    .empty-state {
+      padding: 48px 22px; text-align: center;
+      color: var(--muted); font-size: 13px; line-height: 1.7;
+    }
+    .empty-state .e-icon { font-size: 36px; margin-bottom: 12px; }
+    .empty-state p { margin-bottom: 16px; }
+
+    /* ── DETAIL PANEL ── */
+    .detail-panel { display: flex; flex-direction: column; gap: 14px; }
+
+    /* Case detail card */
+    .detail-card {
+      background: var(--card);
+      border-radius: 4px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+
+    .detail-empty {
+      padding: 32px 20px; text-align: center;
+      color: var(--muted); font-size: 13px; line-height: 1.7;
+    }
+    .detail-empty .de-icon { font-size: 28px; margin-bottom: 10px; }
+
+    .detail-top {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: #fafafa;
+    }
+    .detail-top .d-id {
+      font-family: 'Courier New', monospace;
+      font-size: 15px; font-weight: 700; color: var(--blue); margin-bottom: 4px;
+    }
+    .detail-top .d-type {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px; color: var(--navy);
+    }
+
+    .detail-body { padding: 16px 20px; }
+
+    .d-row {
+      display: flex; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px solid #f0f0f0;
+      font-size: 13px;
+    }
+    .d-row:last-child { border-bottom: none; }
+    .d-row .d-label { color: var(--muted); font-weight: 600; }
+    .d-row .d-val   { color: var(--navy); font-weight: 700; text-align: right; max-width: 55%; }
+
+    /* Timeline */
+    .timeline { padding: 16px 20px; }
+    .tl-item {
+      display: flex; gap: 12px; padding-bottom: 16px;
+      position: relative;
+    }
+    .tl-item:last-child { padding-bottom: 0; }
+    .tl-item:not(:last-child)::before {
+      content: '';
+      position: absolute; left: 9px; top: 20px;
+      width: 2px; bottom: 0;
+      background: var(--border);
+    }
+
+    .tl-dot {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid var(--border);
+      background: white; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; margin-top: 1px; position: relative; z-index: 1;
+    }
+    .tl-dot.done  { background: var(--green); border-color: var(--green); color: white; }
+    .tl-dot.active{ background: var(--blue);  border-color: var(--blue);  color: white; }
+
+    .tl-content { flex: 1; }
+    .tl-title { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 2px; }
+    .tl-sub   { font-size: 11px; color: var(--muted); }
+
+    /* Anonymous note */
+    .anon-note {
+      background: #f0fdf4; border: 1px solid #86efac;
+      border-radius: var(--radius); padding: 12px 14px;
+      font-size: 12px; color: #166534; font-weight: 600;
+      line-height: 1.5;
+    }
+
+    /* message box */
+    .msg-box {
+      background: var(--card);
+      border-radius: 4px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+    .msg-header {
+      padding: 14px 20px; border-bottom: 1px solid var(--border);
+      background: #fafafa;
+    }
+    .msg-header h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 14px; color: var(--navy);
+    }
+    .msg-header p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .msg-body { padding: 14px 20px; }
+    .msg-textarea {
+      width: 100%; border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 10px 12px;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 13px; color: var(--text);
+      resize: none; outline: none; min-height: 80px;
+      transition: border-color 0.18s;
+    }
+    .msg-textarea:focus { border-color: var(--blue); }
+
+    .btn-send {
+      margin-top: 10px; padding: 9px 20px;
+      background: var(--navy); color: white;
+      border: none; border-radius: var(--radius);
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 13px; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.04em;
+      text-transform: uppercase; transition: background 0.18s;
+    }
+    .btn-send:hover { background: #1c3159; }
+
+    .sent-confirm {
+      display: none; font-size: 12px;
+      color: var(--green); font-weight: 700; margin-top: 8px;
+    }
+
+    /* legal footer */
+    .legal-foot {
+      text-align: center; margin-top: 28px;
+      font-size: 11px; color: #9ca3af; line-height: 1.6;
+      padding-top: 16px; border-top: 1px solid var(--border);
+    }
+
+    /* responsive */
+    @media(max-width:720px){
+      .stats { grid-template-columns: 1fr 1fr; }
+      .grid  { grid-template-columns: 1fr; }
+      .topnav { padding: 0 16px; }
+      .page { padding: 20px 14px 48px; }
+      .welcome { flex-direction: column; align-items: flex-start; gap: 12px; }
+    }
+    @media(max-width:480px){
+      .stats { grid-template-columns: 1fr 1fr; }
+      .nav-caseid { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── TOP NAV ── -->
+<nav class="topnav">
+  <div class="nav-left">
+    <img class="nav-logo-img" src="Logo.png" alt="FixMyHostel"
+      onerror="this.style.display='none'" />
+    <div class="nav-brand">
+      FixMyHostel
+      <span>Student Safety Portal</span>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-caseid">Case ID: <strong>#FMH-4821</strong></div>
+    <button class="nav-logout" onclick="window.location.href='fixmyhostel-login-v3.html'">Logout</button>
+  </div>
+</nav>
+
+<!-- ── PAGE ── -->
+<div class="page">
+
+  <!-- Welcome -->
+  <div class="welcome">
+    <div class="welcome-text">
+      <h2>Welcome back, Student #CS2021045</h2>
+      <p>Your complaints are anonymous. Only you can see this dashboard using your Case ID.</p>
+    </div>
+    <a class="btn-new" href="complaint.html">+ New Complaint</a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card blue">
+      <div class="stat-num" id="stat-total">3</div>
+      <div class="stat-label">Total Complaints</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-num" id="stat-open">1</div>
+      <div class="stat-label">Under Review</div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-num" id="stat-action">1</div>
+      <div class="stat-label">Action Taken</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-num" id="stat-closed">1</div>
+      <div class="stat-label">Resolved</div>
+    </div>
+  </div>
+
+  <!-- Main grid -->
+  <div class="grid">
+
+    <!-- LEFT: Complaint list -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3>My Complaints</h3>
+        <span>Click a case to view details</span>
+      </div>
+
+      <!-- Complaint items — loaded from backend dynamically -->
+      <div id="complaints-list">
+        <div class="empty-state">
+          <div class="e-icon">⏳</div>
+          <p>Loading your complaints...</p>
+        </div>
+      </div>
+
+    </div><!-- /complaint list -->
+
+    <!-- RIGHT: Detail panel -->
+    <div class="detail-panel">
+
+      <!-- Case detail -->
+      <div class="detail-card" id="detail-card">
+        <div class="detail-top">
+          <div class="d-id" id="d-id">#FMH-4821</div>
+          <div class="d-type" id="d-type">Repeated Bullying</div>
+        </div>
+        <div class="detail-body">
+          <div class="d-row"><span class="d-label">Status</span><span class="d-val" id="d-status"><span class="status-badge s-review">Under Review</span></span></div>
+          <div class="d-row"><span class="d-label">Date Filed</span><span class="d-val" id="d-date">18 Feb 2026</span></div>
+          <div class="d-row"><span class="d-label">Location</span><span class="d-val" id="d-loc">Block B · Corridor</span></div>
+          <div class="d-row"><span class="d-label">Accused</span><span class="d-val" id="d-accused">Another Student</span></div>
+          <div class="d-row"><span class="d-label">Routed to</span><span class="d-val" id="d-auth">Hostel Committee</span></div>
+          <div class="d-row"><span class="d-label">Your identity</span><span class="d-val" style="color:var(--green);">🔒 Protected</span></div>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="detail-card">
+        <div class="section-header">
+          <h3>Case Timeline</h3>
+        </div>
+        <div class="timeline" id="timeline">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+      <!-- Anonymous note -->
+      <div class="anon-note">
+        🔒 <strong>Your identity is protected.</strong> Investigators only see your Case ID. Your name and personal details are encrypted and cannot be accessed without a court order.
+      </div>
+
+      <!-- Message box -->
+      <div class="msg-box">
+        <div class="msg-header">
+          <h4>Send Anonymous Message</h4>
+          <p>Add more information to your case — your identity stays hidden</p>
+        </div>
+        <div class="msg-body">
+          <textarea class="msg-textarea" id="msg-input" placeholder="Type additional details or respond to investigator questions..."></textarea>
+          <br/>
+          <button class="btn-send" onclick="sendMsg()">Send Message</button>
+          <div class="sent-confirm" id="sent-confirm">✓ Message sent anonymously to your case investigator.</div>
+        </div>
+      </div>
+
+    </div><!-- /detail panel -->
+  </div><!-- /grid -->
+
+  <div class="legal-foot">
+    © 2026 FixMyHostel · Student Safety Portal · All submissions are encrypted and confidential ·
+    <a href="studentlogin.html" style="color:var(--blue);font-weight:700;text-decoration:none;">Logout</a>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+  // ============================================================
+  //  DASHBOARD — loads real complaints from the backend
+  // ============================================================
+  const API = 'http://localhost:5000/api';
+
+  // Status badge CSS classes
+  const statusMap = {
+    new:    'status-badge s-open',
+    review: 'status-badge s-review',
+    action: 'status-badge s-action',
+    closed: 'status-badge s-closed',
+  };
+
+  const statusLabels = {
+    new:    'New',
+    review: 'Under Review',
+    action: 'Action Taken',
+    closed: 'Resolved'
+  };
+
+  // Type labels
+  const typeLabels = {
+    verbal:   'Verbal / Cyberbullying',
+    bullying: 'Repeated Bullying',
+    physical: 'Physical Assault',
+    sexual:   'Sexual Harassment'
+  };
+
+  // Authority labels
+  const authorityLabels = {
+    warden:    'Hostel Warden',
+    committee: 'Hostel Committee',
+    principal: 'Hostel Principal',
+    icc:       'ICC — POSH Act'
+  };
+
+  // Stores all loaded complaints
+  let allComplaints = [];
+  let activeRef = null;
+
+  // ============================================================
+  //  Load all complaints when page opens
+  // ============================================================
+  async function loadDashboard() {
+    try {
+      const response = await fetch(API + '/complaints', {
+        credentials: 'include'   // sends session cookie
+      });
+
+      // If not logged in, redirect to login
+      if (response.status === 401) {
+        window.location.href = 'studentlogin.html';
+        return;
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        window.location.href = 'studentlogin.html';
+        return;
+      }
+
+      allComplaints = result.complaints;
+
+      // Update stats
+      document.getElementById('stat-total').textContent  = result.stats.total;
+      document.getElementById('stat-open').textContent   = result.stats.review;
+      document.getElementById('stat-action').textContent = result.stats.action;
+      document.getElementById('stat-closed').textContent = result.stats.closed;
+
+      // Render the complaint list
+      renderComplaintList();
+
+      // Show first complaint detail automatically
+      if (allComplaints.length > 0) {
+        showDetail(allComplaints[0].complaint_ref);
+      }
+
+    } catch (err) {
+      document.getElementById('complaints-list').innerHTML = `
+        <div class="empty-state">
+          <div class="e-icon">⚠️</div>
+          <p>Cannot connect to server.<br>Make sure backend is running (python app.py)</p>
+        </div>`;
+    }
+  }
+
+  // ============================================================
+  //  Render the list of complaints on the left side
+  // ============================================================
+  function renderComplaintList() {
+    const list = document.getElementById('complaints-list');
+
+    if (allComplaints.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="e-icon">📋</div>
+          <p>You haven't filed any complaints yet.</p>
+          <a class="btn-new" href="complaint.html">+ File Your First Complaint</a>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = allComplaints.map((c, i) => `
+      <div class="complaint-item ${i === 0 ? 'active' : ''}"
+           onclick="showDetail('${c.complaint_ref}')" id="item-${c.complaint_ref}">
+        <div class="ci-top">
+          <div class="ci-id">#${c.complaint_ref}</div>
+          <div class="ci-date">${formatDate(c.incident_date)}</div>
+        </div>
+        <div class="ci-type">${typeLabels[c.type] || c.type}</div>
+        <div class="ci-desc">${c.location} · ${c.hostel_block}</div>
+        <div class="ci-bottom">
+          <span class="${statusMap[c.status] || 'status-badge'}">${statusLabels[c.status] || c.status}</span>
+          <span class="ci-authority">→ ${authorityLabels[c.routed_to] || c.routed_to}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ============================================================
+  //  Show detail panel for a specific complaint
+  // ============================================================
+  async function showDetail(ref) {
+    activeRef = ref;
+
+    // Highlight the selected item in the list
+    document.querySelectorAll('.complaint-item').forEach(el => el.classList.remove('active'));
+    const item = document.getElementById('item-' + ref);
+    if (item) item.classList.add('active');
+
+    try {
+      const response = await fetch(API + '/complaints/' + ref, {
+        credentials: 'include'
+      });
+      const result = await response.json();
+
+      if (!result.success) return;
+      const c = result.complaint;
+
+      // Fill detail card
+      document.getElementById('d-id').textContent      = '#' + c.complaint_ref;
+      document.getElementById('d-type').textContent    = typeLabels[c.type] || c.type;
+      document.getElementById('d-date').textContent    = formatDate(c.incident_date);
+      document.getElementById('d-loc').textContent     = c.location + ' · ' + c.hostel_block;
+      document.getElementById('d-accused').textContent = c.accused_type === 'staff' ? 'Warden / Staff' : 'Another Student';
+      document.getElementById('d-auth').textContent    = authorityLabels[c.routed_to] || c.routed_to;
+      document.getElementById('d-status').innerHTML    = `<span class="${statusMap[c.status]}">${statusLabels[c.status]}</span>`;
+
+      // Build timeline from status history
+      renderTimeline(c, result.history);
+
+      // Clear message box
+      document.getElementById('msg-input').value = '';
+      document.getElementById('sent-confirm').style.display = 'none';
+
+    } catch (err) {
+      console.error('Failed to load complaint detail', err);
+    }
+  }
+
+  // ============================================================
+  //  Build the timeline for a complaint
+  // ============================================================
+  function renderTimeline(c, history) {
+    const tl = document.getElementById('timeline');
+
+    // Always start with these fixed steps
+    const steps = [
+      { done: true, active: false, title: 'Complaint Submitted', sub: formatDate(c.created_at) },
+      { done: true, active: false, title: 'Encrypted & Secured', sub: 'Your identity is protected' },
+      { done: true, active: false, title: 'Routed to ' + (authorityLabels[c.routed_to] || c.routed_to), sub: 'Case assigned to investigator' },
+    ];
+
+    // Add status history entries
+    if (history && history.length > 0) {
+      history.forEach(h => {
+        steps.push({
+          done: true, active: false,
+          title: 'Status: ' + (statusLabels[h.new_status] || h.new_status),
+          sub: formatDate(h.changed_at)
+        });
+      });
+    }
+
+    // Add current status as the active step if not closed
+    if (c.status !== 'closed') {
+      steps.push({
+        done: false, active: true,
+        title: 'Investigation In Progress',
+        sub: 'Awaiting decision'
+      });
+      steps.push({
+        done: false, active: false,
+        title: 'Resolution / Outcome',
+        sub: 'Pending'
+      });
+    } else {
+      steps.push({
+        done: true, active: false,
+        title: 'Case Resolved',
+        sub: 'Complaint closed'
+      });
+    }
+
+    tl.innerHTML = steps.map(t => `
+      <div class="tl-item">
+        <div class="tl-dot ${t.done ? 'done' : t.active ? 'active' : ''}">
+          ${t.done ? '✓' : t.active ? '●' : ''}
+        </div>
+        <div class="tl-content">
+          <div class="tl-title" style="color:${t.done ? 'var(--navy)' : t.active ? 'var(--blue)' : 'var(--muted)'}">
+            ${t.title}
+          </div>
+          <div class="tl-sub">${t.sub}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ============================================================
+  //  Send anonymous message to investigator
+  // ============================================================
+  async function sendMsg() {
+    const val = document.getElementById('msg-input').value.trim();
+    if (!val || !activeRef) return;
+
+    try {
+      const response = await fetch(API + '/complaints/' + activeRef + '/message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ content: val })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        document.getElementById('msg-input').value = '';
+        const confirm = document.getElementById('sent-confirm');
+        confirm.style.display = 'block';
+        setTimeout(() => confirm.style.display = 'none', 4000);
+      }
+    } catch (err) {
+      alert('Could not send message. Make sure backend is running.');
+    }
+  }
+
+  // ============================================================
+  //  Helper: Format date nicely e.g. "18 Feb 2026"
+  // ============================================================
+  function formatDate(dateStr) {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr);
+    if (isNaN(d)) return dateStr;
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  // ── Load everything when page opens ──────────────────────
+  loadDashboard();
+</script>
+
+</body>
+</html>
